@@ -1256,9 +1256,34 @@ function updateHud(){if(stage==='storyMission'&&storyMission){
  return;
  }brandEl.textContent=player.creatorMode?'CREATOR MODE':gameMode==='story'?'STORY MODE':'SHARDBOUND';scoreEl.textContent=score;scoreLabelEl.textContent=`／ ${shardGoal()} SHARDS`;healthFillEl.style.width=`${Math.max(0,player.hp)/player.maxHp*100}%`;healthTextEl.textContent=`${player.hp} / ${player.maxHp}`;const mode=currentMode(),step=courseIndex()+1;progressEl.textContent=stage==='boss'?(boss&&boss.portalActive?`${boss.name.toUpperCase()} · PORTAL OPEN`:`${boss?boss.name.toUpperCase():'GUARDIAN'} ${boss?boss.hp:0}/${boss?boss.maxHp:0}`):score>=shardGoal()?`LEVEL ${step}/15 · ${mode.name} · GATE OPEN`:`LEVEL ${step}/15 · ${mode.name} · ${score}/${shardGoal()}`;abilityEl.textContent=player.creatorMode?'G CREATOR ON · WASD FLY · Q PORTALS':stage==='boss'?(boss&&boss.portalActive?'BOSS DEFEATED · ENTER THE PORTAL':'MIXED-ELEMENT BOSS · WATCH ITS WINDUP'):mode.ability;updateWeaponHud()}
 function syncCursor(){gameEl.classList.remove('cursor-hidden','aim-cursor');if(gameState!=='playing'||inStoryHub())return;gameEl.classList.add(player&&player.weapon==='sword'?'cursor-hidden':'aim-cursor')}
-function startGame(){if(gameState==='playing')return;if(gameState==='paused'){gameState='playing';overlay.classList.add('hidden');keys={};syncCursor();last=performance.now();return}if(!selectedDevice){showDeviceChoice();return}try{reset()}catch(error){console.error('Shardbound startup failed:',error);gameState='title';overlay.classList.remove('hidden');startBtn.classList.add('hidden');deviceChoice.classList.remove('hidden');gameNote.textContent='The game hit a startup error: '+(error&&error.message?error.message:'unknown error');return}gameState='playing';overlay.classList.add('hidden');syncCursor();last=performance.now()}
-function pauseGame(){if(gameState!=='playing')return;gameState='paused';keys={};syncCursor();overlay.querySelector('.eyebrow').textContent='Journey paused';overlay.querySelector('h1').textContent='Paused';overlay.querySelector('p').textContent='Take your time. Press Escape or choose Resume journey when you’re ready.';startBtn.textContent='Resume journey';storyQuit.classList.toggle('hidden',gameMode!=='story');storyQuit.textContent=stage==='storyMission'?'Return to field camp':'Return to title';overlay.querySelector('.note').textContent='The mouse is visible while paused.';overlay.classList.remove('hidden')}
-function resumeGame(){if(gameState!=='paused')return;gameState='playing';keys={};overlay.classList.add('hidden');syncCursor();last=performance.now()}
+function startGame(){if(gameState==='playing')return;if(gameState==='paused'){resumeGame();return}if(!selectedDevice){showDeviceChoice();return}try{reset()}catch(error){console.error('Shardbound startup failed:',error);gameState='title';overlay.classList.remove('hidden');startBtn.classList.add('hidden');deviceChoice.classList.remove('hidden');gameNote.textContent='The game hit a startup error: '+(error&&error.message?error.message:'unknown error');return}gameState='playing';overlay.classList.add('hidden');syncCursor();last=performance.now()}
+function pauseGame(){
+ if(gameState!=='playing')return;
+ gameState='paused';
+ keys={};
+ syncCursor();
+ overlay.querySelector('.eyebrow').textContent='Journey paused';
+ overlay.querySelector('h1').textContent='Paused';
+ introText.textContent=selectedDevice==='mobile'?'Tap Resume journey to keep playing.':'Press Escape or choose Resume journey to keep playing.';
+ startBtn.textContent='Resume journey';
+ startBtn.classList.remove('hidden');
+ deviceChoice.classList.add('hidden');
+ deviceChoice.setAttribute('aria-hidden','true');
+ storyQuit.classList.toggle('hidden',gameMode!=='story');
+ storyQuit.textContent=stage==='storyMission'?'Return to field camp':'Return to title';
+ gameNote.textContent='';
+ overlay.classList.remove('hidden');
+ startBtn.focus({preventScroll:true});
+}
+function resumeGame(){
+ if(gameState!=='paused')return;
+ gameState='playing';
+ keys={};
+ overlay.classList.add('hidden');
+ syncCursor();
+ last=performance.now();
+ canvas.focus({preventScroll:true});
+}
 const bossVariants=[
  {name:'Ember Colossus',body:'#a94732',accent:'#f3a34f'},
  {name:'Briar Regent',body:'#456843',accent:'#a0ca59'},
@@ -1436,7 +1461,7 @@ window.addEventListener('keydown',e=>{if(gameState==='upgrade')return;if(gameSta
  return;
  }if((e.target===storyQuit||e.target===storyAction)&&(e.code==='Enter'||e.code==='Space'))return;
  if(e.code==='KeyF'&&!e.repeat&&gameState==='playing'&&(inStoryHub()||stage==='storyMission')){e.preventDefault();interactStoryHub();return}
- if(e.code==='Escape'){e.preventDefault();if(gameState==='playing')pauseGame();else if(gameState==='paused')resumeGame();return}const onStartControl=e.target instanceof Element&&e.target.closest('#start,#pcStart,#mobileStart,#tutorialStart,#storyStart');if((e.target===tutorialDismiss||e.target===tutorialSkip)&&(e.code==='Enter'||e.code==='Space'))return;if(['KeyW','KeyA','KeyS','KeyD','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code)&&!(e.code==='Space'&&onStartControl))e.preventDefault();keys[e.code]=true;if((gameState==='title'||gameState==='won'||gameState==='lost')&&(e.code==='Enter'||e.code==='Space')&&!onStartControl){e.preventDefault();beginJourney();return}if(!e.repeat&&(e.code==='KeyW'||e.code==='ArrowUp'||e.code==='Space'))tryJump();if(!e.repeat&&e.code==='KeyG'){player.creatorMode=!player.creatorMode;player.vx=0;player.vy=0;updateHud()}if(!e.repeat&&e.code==='Digit1')selectWeapon('sword');if(!e.repeat&&e.code==='Digit2')selectWeapon('bow');if(!e.repeat&&e.code==='Digit3')selectWeapon('staff');if(!e.repeat&&e.code==='Digit4')selectWeapon('chakram');if(e.code==='KeyS'&&!e.repeat&&!inWater()&&player.onGround&&!player.creatorMode)tryDrop();if(e.code==='KeyE'&&!e.repeat)specialAbility();if(e.code==='KeyQ'&&!e.repeat)tryDash();if(e.code==='KeyR'&&!e.repeat)shardBurst()});
+ if(e.code==='Escape'){e.preventDefault();if(e.repeat)return;if(gameState==='playing')pauseGame();else if(gameState==='paused')resumeGame();return}const onStartControl=e.target instanceof Element&&e.target.closest('#start,#pcStart,#mobileStart,#tutorialStart,#storyStart');if((e.target===tutorialDismiss||e.target===tutorialSkip)&&(e.code==='Enter'||e.code==='Space'))return;if(['KeyW','KeyA','KeyS','KeyD','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code)&&!(e.code==='Space'&&onStartControl))e.preventDefault();keys[e.code]=true;if((gameState==='title'||gameState==='won'||gameState==='lost')&&(e.code==='Enter'||e.code==='Space')&&!onStartControl){e.preventDefault();beginJourney();return}if(!e.repeat&&(e.code==='KeyW'||e.code==='ArrowUp'||e.code==='Space'))tryJump();if(!e.repeat&&e.code==='KeyG'){player.creatorMode=!player.creatorMode;player.vx=0;player.vy=0;updateHud()}if(!e.repeat&&e.code==='Digit1')selectWeapon('sword');if(!e.repeat&&e.code==='Digit2')selectWeapon('bow');if(!e.repeat&&e.code==='Digit3')selectWeapon('staff');if(!e.repeat&&e.code==='Digit4')selectWeapon('chakram');if(e.code==='KeyS'&&!e.repeat&&!inWater()&&player.onGround&&!player.creatorMode)tryDrop();if(e.code==='KeyE'&&!e.repeat)specialAbility();if(e.code==='KeyQ'&&!e.repeat)tryDash();if(e.code==='KeyR'&&!e.repeat)shardBurst()});
 window.addEventListener('keyup',e=>{keys[e.code]=false;if((e.code==='KeyW'||e.code==='ArrowUp'||e.code==='Space')&&player&&player.vy<0){player.vy=Math.max(player.vy,-285);player.jumpHold=0}});
 document.querySelectorAll('.touch button').forEach(b=>{const code=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();if(b.dataset.weapon){selectWeapon(b.dataset.weapon);return}if(b.dataset.action==='attack'){attack();return}if(b.dataset.action==='special'){specialAbility();return}if(b.dataset.action==='dash'){tryDash();return}if(b.dataset.action==='drop'){tryDrop();return}if(b.dataset.action==='burst'){shardBurst();return}if(b.dataset.action==='pause'){if(gameState==='playing')pauseGame();else if(gameState==='paused')resumeGame();return}if(code){keys[code]=true;if(code==='Space')tryJump()}});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>{if(!code)return;if(code==='ArrowLeft'||code==='ArrowRight')setTimeout(()=>keys[code]=false,180);else keys[code]=false}))});
 function rect(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
