@@ -2119,7 +2119,7 @@ function selectWeapon(weapon){
  p.swing=0;
  p.weaponSwapTimer=.25;
  p.weaponDrawKind=weapon;
- p.weaponEquipTimer=p.weaponEquipDuration=.30;
+ p.weaponEquipTimer=p.weaponEquipDuration=weapon==='sword'?.90:.68;
  if(weapon==='sword'&&(previous==='bow'||previous==='staff'))lungeToMarkedEnemy(p);
  syncCursor();
  updateHud();
