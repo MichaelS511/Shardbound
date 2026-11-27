@@ -243,41 +243,14 @@ const groundY=460,groundRunSpeed=360,dashSpeed=780,dashDistance=172,dashDuration
 const soundSampleRate=24000;
 // Layers use a material, duration, start/end frequency, level, and optional offset.
 const gameSounds={
- ready:[['metal',.51,274,274,.55],['air',.26,380,900,.22,.04]],
- step:[['stone',.12,117,102,.57],['grit',.16,1180,470,.37,.009]],
  jump:[['leather',.18,790,1340,.51],['stone',.11,135,105,.42],['air',.19,420,1120,.28,.025]],
- doubleJump:[['air',.21,640,1790,.61],['leather',.15,1300,790,.36,.039],['ice',.25,371,371,.13,.052]],
- land:[['stone',.20,100,82,.66],['grit',.22,1750,710,.50,.012],['leather',.14,1120,510,.31,.027]],
- roll:[['leather',.34,1170,510,.60],['grit',.28,1900,720,.46,.055],['stone',.16,122,94,.38,.15]],
  dash:[['air',.34,470,2630,.75],['grit',.17,4300,1400,.36,.065],['air',.28,3200,920,.36,.115]],
- equip:[['leather',.16,720,1280,.47],['grit',.13,3100,5100,.37,.030],['metal',.23,820,796,.28,.073]],
  sword:[['air',.19,570,3490,.62],['grit',.12,2510,5100,.29,.027],['metal',.25,725,709,.29,.058]],
- heavySword:[['air',.31,430,2360,.78],['leather',.21,1120,620,.22,.037],['metal',.30,358,349,.33,.087],['stone',.16,150,109,.23,.092]],
  bow:[['wood',.29,202,197,.69],['grit',.093,5400,1540,.38,.005],['air',.20,2710,1140,.21,.034]],
  staff:[['fire',.35,1420,730,.64],['stone',.29,172,122,.35],['air',.27,720,1790,.30,.079]],
  chakram:[['metal',.44,946,806,.46],['air',.33,1350,3700,.50],['air',.18,4560,1640,.23,.12]],
- catchChakram:[['metal',.26,670,650,.54],['leather',.12,1810,590,.50],['grit',.11,3200,2120,.26,.039]],
- hit:[['stone',.14,146,110,.63],['leather',.15,1750,680,.42],['grit',.09,2910,1310,.24,.014]],
- block:[['metal',.32,520,515,.61],['grit',.15,4600,2570,.47],['wood',.13,177,165,.19,.018]],
- hurt:[['leather',.25,1170,620,.48],['stone',.21,166,105,.55],['air',.17,960,390,.22,.039]],
- counter:[['metal',.38,366,360,.53],['grit',.23,3800,860,.44],['ice',.32,540,535,.15,.09]],
  shard:[['ice',.49,829,825,.61],['ice',.39,1280,1275,.25,.045],['grit',.18,4600,2200,.15,.01]],
- riptide:[['water',.57,490,2040,.76],['water',.49,2270,720,.45,.12],['stone',.26,136,107,.25,.13]],
- glacier:[['ice',.37,914,909,.47],['grit',.34,5510,2490,.68],['ice',.36,1290,1284,.31,.10],['grit',.20,3820,1360,.24,.20]],
- magma:[['fire',.65,1440,650,.71],['stone',.46,98,85,.54],['air',.35,800,1540,.24,.13]],
- astral:[['air',.58,2420,390,.58],['metal',.64,184,170,.31,.041],['ice',.51,710,680,.25,.14],['air',.33,370,1100,.27,.26]],
- burst:[['stone',.58,83,64,.66],['air',.56,1600,4200,.55],['ice',.54,720,696,.34,.14]],
- bossWarn:[['metal',.62,121,118,.53],['metal',.43,208,204,.27,.15],['air',.49,590,1640,.53,.11]],
- bossAttack:[['stone',.63,112,69,.61],['grit',.53,1800,440,.57],['air',.58,450,2030,.34,.064]],
- win:[['metal',.72,205,205,.42],['ice',.76,326,326,.35,.13],['metal',.84,488,488,.29,.37]],
- defeat:[['stone',.54,121,87,.46],['metal',.76,188,159,.40,.11],['air',.46,620,330,.24,.25]],
- drop:[['leather',.19,1180,600,.50],['grit',.14,2200,960,.43,.04]],
- magmaImpact:[['stone',.54,93,65,.65],['fire',.46,2610,820,.64],['grit',.35,3700,1830,.31,.10]],
- gate:[['grit',.40,850,380,.58],['stone',.43,109,85,.53],['metal',.52,310,310,.38,.18]],
- enemyTell:[['leather',.15,770,1080,.44],['wood',.22,260,239,.31,.039],['grit',.11,2870,1510,.22,.095]]
 };
-const soundPeak={step:.23,land:.57,hit:.60,equip:.51,shard:.59,enemyTell:.40};
-const soundSteps={step:.20,hit:.069,hurt:.18,block:.11,shard:.072};
 // Resonators are intentionally inharmonic. Higher modes decay before the body of the sound.
 const soundResonators={
  stone:[[1,.72,3.2],[1.84,.28,7.5],[3.12,.13,11]],
@@ -285,11 +258,10 @@ const soundResonators={
  metal:[[1,.68,2.3],[1.498,.32,4],[2.126,.28,6.1],[3.53,.19,8.6],[5.03,.10,13]],
  ice:[[1,.55,3.2],[1.366,.30,5.3],[2.447,.27,7.5],[3.82,.14,12.4],[5.29,.11,14]]
 };
-const soundSpace={riptide:.10,glacier:.12,magma:.10,astral:.17,burst:.18,bossWarn:.14,bossAttack:.17,gate:.11,win:.14,defeat:.13};
 function renderGameSound(name){
- const voices=gameSounds[name],space=soundSpace[name]||0;
+ const voices=gameSounds[name];
  const duration=Math.max(...voices.map(([,time,,,,delay=0])=>time+delay));
- const samples=new Float32Array(Math.ceil((duration+(space?.093:0))*soundSampleRate));
+ const samples=new Float32Array(Math.ceil(duration*soundSampleRate));
  let seed=23917;
  for(const [material,time,start,end,volume,delay=0] of voices){
   const frames=Math.floor(time*soundSampleRate),offset=Math.floor(delay*soundSampleRate);
@@ -316,22 +288,14 @@ function renderGameSound(name){
     envelope=Math.sin(Math.PI*t)**(material==='air'?.95:.52)*(1-t)**(material==='air'?.55:1.25);
     if(material==='grit')frame=frame*.73+transient*.67;
     if(material==='leather')frame=(frame*.75+low*.3)*(.75+.25*Math.cos(t*16));
-    if(material==='water')frame=(frame+low*.20)*(.66+.24*Math.sin(t*33)+.10*Math.sin(t*79));
     if(material==='fire')frame=frame*.57+transient*.92;
    }
    samples[offset+i]+=frame*envelope*volume;
   }
  }
- if(space){
-  const direct=samples.slice();
-  for(const [delay,level] of [[.026,space],[.052,space*.53],[.089,space*.27]]){
-   const steps=Math.floor(delay*soundSampleRate);
-   for(let i=steps;i<samples.length;i++)samples[i]+=direct[i-steps]*level;
-  }
- }
  let peak=0;
  for(const sample of samples)peak=Math.max(peak,Math.abs(sample));
- const gain=(soundPeak[name]??.76)/Math.max(peak,.01);
+ const gain=(name==='shard'?.59:.76)/Math.max(peak,.01);
  for(let i=0;i<samples.length;i++)samples[i]*=gain;
  return samples;
 }
@@ -369,9 +333,9 @@ function unlockSound(){
  }catch{}
 }
 function sfx(name,variation=.04){
- if(soundMuted||!masterSound||audio.state!=='running'||voicesPlaying>=(name==='step'?5:16))return;
+ if(soundMuted||!masterSound||audio.state!=='running'||voicesPlaying>=16)return;
  const now=audio.currentTime,previous=lastSound.get(name)??-Infinity;
- if(now-previous<(soundSteps[name]??.045))return;
+ if(now-previous<(name==='shard'?.072:.045))return;
  let buffer=soundBuffers.get(name);
  if(!buffer){
   const samples=renderGameSound(name);
@@ -394,7 +358,6 @@ function setSoundMuted(muted){
  try{localStorage.setItem(soundSetting,String(muted))}catch{}
  if(!muted)unlockSound();
  updateSoundButton();
- if(!muted)sfx('equip');
 }
 soundToggle.addEventListener('click',()=>setSoundMuted(!soundMuted));
 updateSoundButton();
@@ -1864,7 +1827,6 @@ function showUpgradeChoices({
   button.addEventListener('click',()=>{
    if(gameState!=='upgrade'||button.disabled)return;
    choice.apply();
-   sfx('ready',0);
    upgradeModal.classList.add('hidden');
    gameState='playing';
    keys={};
@@ -2127,7 +2089,6 @@ function chooseDevice(device){unlockSound();selectedDevice=device;gameEl.dataset
 window.shardboundChooseDevice=device=>chooseDevice(device);window.shardboundResumeJourney=resumeGame;window.shardboundIsPaused=()=>gameState==='paused';
 function awardDashCounter(){
  if(stage==='tutorial'||inStoryHub()||player.creatorMode||player.dashCounterEarned)return;
- sfx('counter');
  player.dashCounterEarned=true;
  player.dashCooldown=0;
  player.counterTimer=3;
@@ -2193,7 +2154,7 @@ function tryDash(){
   }
  }
  const distance=Math.abs(destination-p.x),groundRoll=p.onGround;
- sfx(groundRoll?'roll':'dash');
+ sfx('dash');
  p.dashCounterEarned=false;
  p.dashDir=p.face=dir;
  p.dashTargetX=destination;
@@ -2260,7 +2221,7 @@ function useBufferedJump(p,dt){
   p.dashDodgeTimer=0;
   p.vx=(movementDirection()||p.dashDir)*groundRunSpeed*(p.speedBonus||1);
  }
- sfx(fromGround?'jump':'doubleJump');
+ sfx('jump');
  if(!fromGround){
   p.doubleJumpTimer=.42;
   if(stage==='tutorial'&&tutorialRooms[tutorial.room].skill==='doubleJump')tutorial.skillUsed=true;
@@ -2277,12 +2238,11 @@ function useBufferedJump(p,dt){
 }
 function inWater(p=player){return stage==='causeway'&&waterZones.some(z=>p.x+p.w>z.x&&p.x<z.x+z.w&&p.y+p.h>z.y&&p.y<z.y+z.h)}
 
-function shardBurst(){const p=player;if(gameState!=='playing'||p.ultimateCharge<100)return;p.ultimateCharge=0;sfx('burst');const cx=p.x+p.w/2,cy=p.y+p.h/2;p.burstArt={x:cx,y:cy,time:.52,max:.52};for(let i=0;i<24;i++){const a=i*Math.PI*2/24;shots.push({x:cx,y:cy,vx:Math.cos(a)*460,vy:Math.sin(a)*460,life:1.2,type:'shard',damage:3,void:true,burst:true})}burst(cx,cy,'#b9f8ff',28);updateWeaponHud()}
+function shardBurst(){const p=player;if(gameState!=='playing'||p.ultimateCharge<100)return;p.ultimateCharge=0;const cx=p.x+p.w/2,cy=p.y+p.h/2;p.burstArt={x:cx,y:cy,time:.52,max:.52};for(let i=0;i<24;i++){const a=i*Math.PI*2/24;shots.push({x:cx,y:cy,vx:Math.cos(a)*460,vy:Math.sin(a)*460,life:1.2,type:'shard',damage:3,void:true,burst:true})}burst(cx,cy,'#b9f8ff',28);updateWeaponHud()}
 function selectWeapon(weapon){
  const p=player,previous=p.weapon;
  if(weapon===previous)return;
  p.weapon=weapon;
- sfx('equip');
  p.swordBuffer=0;
  p.swing=0;
  p.weaponSwapTimer=.25;
@@ -2320,7 +2280,7 @@ gameEl.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')mouse.acti
 gameEl.addEventListener('pointerdown',e=>{const attackPointer=e.pointerType==='mouse'&&e.button===0||e.pointerType==='touch'&&gameEl.classList.contains('mobile-mode');if(attackPointer&&!e.target.closest('.touch')&&!e.target.closest('.overlay,.tutorial-tip,.story-scene,.story-action,.upgrade-modal,.sound-toggle')){e.preventDefault();trackMouse(e);attack(1)}});
 function startSwordSwing(p){
  const heavy=p.swordComboTimer>0&&p.swordComboStep===2;
- sfx(heavy?'heavySword':'sword');
+ sfx('sword');
  p.swordComboStep=heavy?0:p.swordComboTimer>0?p.swordComboStep+1:1;
  p.swordComboTimer=1.15;
  p.swingFace=movementDirection()||p.face;
@@ -2352,7 +2312,6 @@ function steerChakram(shot,p,dt){
   const dx=p.x+p.w/2-shot.x,dy=p.y+23-shot.y,distance=Math.hypot(dx,dy);
   if(distance<22){
    shot.life=0;
-   sfx('catchChakram');
    if(shot.scoredReturn){
     const previous=p.ultimateCharge||0;
     p.ultimateCharge=Math.min(100,previous+10);
@@ -2420,7 +2379,6 @@ function specialAbility(){
   if(skill==='ability'||skill===key)tutorial.skillUsed=true;
  }
  cooldowns[key]=7;
- sfx(key==='sword'?'riptide':key==='bow'?'glacier':key==='staff'?'magma':'astral');
  player.weaponEquipTimer=0;
  const cx=player.x+player.w/2,cy=player.y+24;
  let dx=player.face,dy=0;
@@ -2450,7 +2408,6 @@ function specialAbility(){
 }
 function tryDrop(){
  if(gameState!=='playing'||!player.onGround||player.y+player.h>=groundY-2||player.creatorMode)return;
- sfx('drop');
  player.dropThrough=.28;
  player.dropAnim=.48;
  player.dropPlatformY=player.y+player.h;
@@ -2601,7 +2558,6 @@ function updateRangedGuard(e,p,dt){
   e.aimY=decoy?decoy.y+24:p.y+p.h/2;
   e.dir=Math.sign(e.aimX-e.x-16)||e.dir;
   e.telegraphArmed=true;
-  if(Math.abs(p.x-e.x)<430)sfx('enemyTell');
   e.windup=stage==='tutorial'?.69:.82;
   return;
  }
@@ -2631,11 +2587,11 @@ function drawEnemyTelegraph(e){
  ctx.restore();
 }
 
-function enemyHitDamage(target,base,x,y,trainingTargetHit=false,canCounter=false,guardBreak=false){if(target.type==='target'&&!trainingTargetHit)return 0;const critical=Math.random()<.3;if(!guardBreak&&!critical&&target.armored&&Math.random()<.1){sfx('block');burst(x,y,'#b9d3de',7);particles.push({x,y,vx:0,vy:-35,life:.65,max:.65,color:'#d7eaf0',size:12,text:'BLOCKED'});return 0}target.impactFlash=.11;sfx('hit',.15);
+function enemyHitDamage(target,base,x,y,trainingTargetHit=false,canCounter=false,guardBreak=false){if(target.type==='target'&&!trainingTargetHit)return 0;const critical=Math.random()<.3;if(!guardBreak&&!critical&&target.armored&&Math.random()<.1){burst(x,y,'#b9d3de',7);particles.push({x,y,vx:0,vy:-35,life:.65,max:.65,color:'#d7eaf0',size:12,text:'BLOCKED'});return 0}target.impactFlash=.11;
  base=counterDamage(base,canCounter&&target.type!=='target',x,y);if(critical){burst(x,y,'#fff06a',12);particles.push({x,y,vx:0,vy:-48,life:.8,max:.8,color:'#fff06a',size:12,text:'CRIT! ×2'});popupDamage(x,y,base*2,'#fff06a');return base*2}popupDamage(x,y,base);return base}
 function bossHitDamage(x,y,base=15,canCounter=false){
  const exposed=gameMode==='campaign'&&boss?.worldBoss&&boss.exposed>0&&!boss.cue;
- sfx('hit',.15);
+
  const impact=counterDamage(base,canCounter,x,y);
  const damage=critDamage(exposed?impact*2:impact,x,y);
  popupDamage(x,y,damage,exposed?'#adf8ef':'#ffe49a');
@@ -2650,8 +2606,8 @@ function swordSwingLunge(timer,duration){const t=Math.max(0,Math.min(1,1-timer/d
 function moveChampion(p,dt){const b=boss;b.moveClock=(b.moveClock||0)+dt;const left=arena.left+92,right=arena.right-b.w-32,dx=p.x+p.w/2-(b.x+b.w/2),dir=Math.abs(dx)>76?Math.sign(dx):(Math.sign(Math.sin(b.moveClock*2.3))||1);b.x=Math.max(left,Math.min(right,b.x+dir*62*dt))}
 function projectileKind(element){return ({fire:'flame',grass:'thorn',steel:'steel',sand:'sand',storm:'storm',gravity:'gravity',ice:'ice',shadow:'shadow',crystal:'crystal'})[element]||'flame'}
 function launchElementVolley(b,p,elements,spread=.16,speed=205){const sx=b.x+(b.face>0?b.w-6:6),sy=b.y+54,angle=Math.atan2(p.y+p.h/2-sy,p.x+p.w/2-sx);elements.forEach((element,i)=>{const offset=(i-(elements.length-1)/2)*spread,a=angle+offset;fireballs.push({x:sx,y:sy,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,life:5,kind:projectileKind(element),element})})}
-function queueBossCue(type,p,element){if(!boss||boss.cue)return;sfx('bossWarn');const b=boss;const aimY=Math.max(groundY-245,Math.min(groundY-38,p.y+p.h*.58));const windup=type==='laser'?1:type==='claw'?.84:.94;b.cue={type,element:element||b.element||currentMode().element,time:windup,max:windup,aimX:p.x+p.w/2,aimY,face:b.face||1};b.pose=type}
-function resolveBossCue(b,c){sfx('bossAttack');const bounds=arena||{left:0,right:worldW};if(c.type==='laser'){bossHazards.push({type:'beam',x:bounds.left+18,y:c.aimY-9,w:bounds.right-bounds.left-36,h:18,activeDelay:.18,life:.52,hit:false,element:c.element})}else if(c.type==='claw'){const x=b.face>0?b.x+b.w-8:b.x-100;bossHazards.push({type:'claw',x,y:groundY-112,w:108,h:86,activeDelay:.18,life:.46,hit:false,face:b.face,element:c.element})}else if(c.type==='shockwave'){for(const dir of [-1,1])bossHazards.push({type:'stomp',element:c.element,x:b.x+b.w/2,y:groundY-18,w:58,h:18,vx:dir*300,life:3})}else if(c.type==='barrage'){for(const off of [-92,-42,8,58,108]){const x=Math.max(bounds.left+32,Math.min(bounds.right-28,c.aimX+off));bossHazards.push({type:'icicle',element:c.element==='ice'?'ice':'crystal',x,y:-32,w:20,h:38,vy:430,life:2.7})}}else if(c.type==='nova'){const count=8,speed=205;for(let i=0;i<count;i++){const a=i*Math.PI*2/count+b.moveClock*.25;fireballs.push({x:b.x+b.w/2,y:b.y+b.h/2,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,life:3.6,kind:projectileKind(c.element),element:c.element})}}burst(b.x+b.w/2,b.y+b.h*.62,elementColors[c.element]||'#b5eaff',c.type==='nova'?10:6);b.attackPose=c.type;b.attackPoseTimer=.42}
+function queueBossCue(type,p,element){if(!boss||boss.cue)return;const b=boss;const aimY=Math.max(groundY-245,Math.min(groundY-38,p.y+p.h*.58));const windup=type==='laser'?1:type==='claw'?.84:.94;b.cue={type,element:element||b.element||currentMode().element,time:windup,max:windup,aimX:p.x+p.w/2,aimY,face:b.face||1};b.pose=type}
+function resolveBossCue(b,c){const bounds=arena||{left:0,right:worldW};if(c.type==='laser'){bossHazards.push({type:'beam',x:bounds.left+18,y:c.aimY-9,w:bounds.right-bounds.left-36,h:18,activeDelay:.18,life:.52,hit:false,element:c.element})}else if(c.type==='claw'){const x=b.face>0?b.x+b.w-8:b.x-100;bossHazards.push({type:'claw',x,y:groundY-112,w:108,h:86,activeDelay:.18,life:.46,hit:false,face:b.face,element:c.element})}else if(c.type==='shockwave'){for(const dir of [-1,1])bossHazards.push({type:'stomp',element:c.element,x:b.x+b.w/2,y:groundY-18,w:58,h:18,vx:dir*300,life:3})}else if(c.type==='barrage'){for(const off of [-92,-42,8,58,108]){const x=Math.max(bounds.left+32,Math.min(bounds.right-28,c.aimX+off));bossHazards.push({type:'icicle',element:c.element==='ice'?'ice':'crystal',x,y:-32,w:20,h:38,vy:430,life:2.7})}}else if(c.type==='nova'){const count=8,speed=205;for(let i=0;i<count;i++){const a=i*Math.PI*2/count+b.moveClock*.25;fireballs.push({x:b.x+b.w/2,y:b.y+b.h/2,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,life:3.6,kind:projectileKind(c.element),element:c.element})}}burst(b.x+b.w/2,b.y+b.h*.62,elementColors[c.element]||'#b5eaff',c.type==='nova'?10:6);b.attackPose=c.type;b.attackPoseTimer=.42}
 function tickBossCue(b,dt){b.attackPoseTimer=Math.max(0,(b.attackPoseTimer||0)-dt);if(!b.cue)return;b.cue.time-=dt;if(b.cue.time<=0){const cue=b.cue;b.cue=null;resolveBossCue(b,cue)}}
 function bossCueType(index,worldBoss,finalBoss){const set=worldBoss||finalBoss?['laser','claw','shockwave','barrage','nova']:['laser','claw','barrage','shockwave','nova'];return set[((index-1)%set.length+set.length)%set.length]}
 function updateWorldBossFight(p,dt){const b=boss,w=b.bossWorld,left=arena.left+72,right=arena.right-b.w-24;b.exposed=Math.max(0,b.exposed-dt);b.moveClock+=dt;b.desperate=b.hp<=b.maxHp*.4;b.attackTimer-=(b.exposed>0?.35:1)*dt*(b.desperate?2:1);b.specialTimer-=dt*(b.desperate?2:1);if(w===1){b.x+=Math.sin(b.moveClock*1.2)*18*dt;b.y=b.baseY+Math.sin(b.moveClock*2.1)*4}else if(w===2){b.chargeCooldown-=dt;if(b.chargeTimer>0){b.chargeTimer-=dt;b.x+=b.chargeDir*205*dt}else if(b.chargeCooldown<=0){b.chargeDir=Math.sign(p.x+p.w/2-(b.x+b.w/2))||b.moveDir;b.chargeTimer=.48;b.chargeCooldown=2.8}else b.x+=b.moveDir*19*dt;b.y=b.baseY+Math.abs(Math.sin(b.moveClock*3))*3}else{b.x+=Math.sin(b.moveClock*1.35)*58*dt;b.y=b.baseY+Math.sin(b.moveClock*2.8)*16}b.x=Math.max(left,Math.min(right,b.x));if(b.x<=left+.1)b.moveDir=1;else if(b.x>=right-.1)b.moveDir=-1;b.face=p.x+p.w/2<b.x+b.w/2?-1:1;if(b.attackTimer<=0){if(b.desperate){for(let i=0;i<16;i++){const a=i*Math.PI*2/16+b.moveClock*.72,element=b.elements[(i+b.attackCount)%b.elements.length];fireballs.push({x:b.x+b.w/2,y:b.y+b.h/2,vx:Math.cos(a)*220,vy:Math.sin(a)*220,life:4,kind:projectileKind(element),element})}}else launchElementVolley(b,p,[b.element,b.element,b.element],w===1?.15:w===2?.22:.12,w===1?190:w===2?175:235);b.attackCount++;b.attackTimer=((w===1?2.05:w===2?1.85:1.65)+Math.random()*.28)*(b.desperate?.61:1.22)}if(b.specialTimer<=0){b.exposed=w===1?2.8:2.2;const type=bossCueType(w,true,false);queueBossCue(type,p,b.elements[b.attackCount%b.elements.length]||b.element);b.specialTimer=(w===1?6.2:w===2?5.2:w===3?4.7:5.4)*(b.desperate?.61:1.22)}tickBossCue(b,dt)}
@@ -2686,7 +2642,6 @@ function damage(showEffect=true,sourceX=null){
   if(showEffect&&player.dashDodgeTimer>0)awardDashCounter();
   return;
  }
- sfx('hurt');
  if(gameMode==='endless')endlessRun.hit=true;
  player.counterTimer=0;
  player.swordBuffer=0;
@@ -2701,7 +2656,7 @@ function damage(showEffect=true,sourceX=null){
  }else if(gameMode==='endless')finishEndlessRun();
  else finish('lost');
  }}
-function finish(state){sfx(state==='won'?'win':'defeat',0);const story=gameMode==='story',stats=story?storyStats:saveStats;victorySequence=null;gameState=state;syncCursor();overlay.classList.remove('hidden');resetJourneyPrompt();overlay.classList.add('ending');overlay.querySelector('.eyebrow').textContent=state==='won'?'Journey complete':'Run ended';overlay.querySelector('h1').textContent=state==='won'?'Shardbound is saved!':'The knight has fallen';introText.textContent=story&&state==='won'?'You restored all five beacon channels and brought the light back to Beacon Town.':state==='won'?`You cleared all 15 elemental stages, defeated the final guardian, and recovered ${totalScore} shards. The realms can shine again!`:`You recovered ${totalScore} shards before your health ran out. Catch your breath and try the journey again.`;keySummary.classList.add('hidden');deviceChoice.classList.add('hidden');deviceChoice.setAttribute('aria-hidden','true');startBtn.classList.remove('hidden');startBtn.textContent=story?'Begin journey':state==='won'?'Play again':'Try again';gameNote.textContent=story?'':`Best shards: ${stats.bestShards||0} · lifetime shards: ${stats.lifetimeShards||0}`}
+function finish(state){const story=gameMode==='story',stats=story?storyStats:saveStats;victorySequence=null;gameState=state;syncCursor();overlay.classList.remove('hidden');resetJourneyPrompt();overlay.classList.add('ending');overlay.querySelector('.eyebrow').textContent=state==='won'?'Journey complete':'Run ended';overlay.querySelector('h1').textContent=state==='won'?'Shardbound is saved!':'The knight has fallen';introText.textContent=story&&state==='won'?'You restored all five beacon channels and brought the light back to Beacon Town.':state==='won'?`You cleared all 15 elemental stages, defeated the final guardian, and recovered ${totalScore} shards. The realms can shine again!`:`You recovered ${totalScore} shards before your health ran out. Catch your breath and try the journey again.`;keySummary.classList.add('hidden');deviceChoice.classList.add('hidden');deviceChoice.setAttribute('aria-hidden','true');startBtn.classList.remove('hidden');startBtn.textContent=story?'Begin journey':state==='won'?'Play again':'Try again';gameNote.textContent=story?'':`Best shards: ${stats.bestShards||0} · lifetime shards: ${stats.lifetimeShards||0}`}
 function safeCourseX(x,pad=26){const spans=platforms.filter(pl=>pl.y>=groundY);let best=x,bestDistance=Infinity;for(const pl of spans){const spot=Math.max(pl.x+pad,Math.min(pl.x+pl.w-pad,x)),distance=Math.abs(spot-x);if(distance<bestDistance){best=spot;bestDistance=distance}}return best}
 function onFrostSheet(p){if(courseIndex()!==6||stage!=='causeway'||Math.abs(p.y+p.h-groundY)>5)return false;return [250,870,1510,2210].some(x=>p.x+p.w>x&&p.x<x+210)}
 function updateCourseEffects(p,dt){
@@ -2968,7 +2923,6 @@ function landOnPlatform(player,previousY){
   surface.crumbleTimer=surface.crumbleDelay||1.05;
  }
  if(player.vy>155){
-  sfx('land');
   player.landTimer=.16;
   burst(player.x+player.w/2,surface.y,'#a8c8dc',4);
   if(player.vy>390)shake=Math.max(shake,2.2);
@@ -2997,7 +2951,7 @@ function update(dt){if(gameState!=='playing')return;dt=Math.min(dt,.033);if(vict
   p.swordBuffer=Math.max(0,p.swordBuffer-dt);
   if(p.swordBuffer>0&&p.swing<=0&&p.swordCooldown<=0&&p.dashTimer<=0)startSwordSwing(p);
  }
- if(p.abilityCooldowns)for(const k of Object.keys(p.abilityCooldowns))p.abilityCooldowns[k]=Math.max(0,p.abilityCooldowns[k]-dt*(1+(p.cooldownBonus||0)));if(p.specialAnim){const a=p.specialAnim;if(a.kind==='staff'&&a.element==='void'){for(const e of enemies){if(e.hp<=0)continue;const dx=a.x-(e.x+16),dy=a.y-(e.y+21),dist=Math.hypot(dx,dy);if(dist<170&&dist>2){const pull=Math.min(78*dt,(170-dist)*.8);e.x=Math.max(e.min??0,Math.min(e.max??worldW-32,e.x+dx/dist*pull))}}}a.time=Math.max(0,a.time-dt);if(!a.time){if(a.kind==='staff'){if(a.element==='magma')sfx('magmaImpact');if(p.vortex?.element==='magma'&&p.vortex.x===a.x&&p.vortex.y===a.y)p.vortex.impactLife=p.vortex.life;const fire='#ff642b';burst(a.x,a.y,fire,24);burst(a.x,a.y,'#ffd36a',12);for(let i=-2;i<=2;i++){const px=a.x+i*24;particles.push({x:px,y:a.y,vx:0,vy:-65,life:.42,max:.42,color:i%2?'#ff8c35':'#ffe16a',size:7})}for(const e of enemies){if(e.hp>0&&Math.hypot(e.x+16-a.x,e.y+21-a.y)<100){e.hp=Math.max(0,e.hp-enemyHitDamage(e,2,e.x+16,e.y+21));applyEssenceEffects(e,Math.sign(e.x-a.x));if(stage==='castle'&&e.hp<=0)updateCastleProgress()}}if(boss&&boss.hp>0&&!boss.armor&&Math.hypot(boss.x+boss.w/2-a.x,boss.y+boss.h/2-a.y)<112){boss.hp=Math.max(0,boss.hp-bossHitDamage(boss.x+boss.w/2,boss.y+boss.h/2));applyEssenceEffects(boss,Math.sign(boss.x-a.x));updateHud();if(boss.hp<=0)advanceBossLevel()}}p.specialAnim=null}}p.dropThrough=Math.max(0,p.dropThrough-dt);p.dropAnim=Math.max(0,(p.dropAnim||0)-dt);p.doubleJumpTimer=Math.max(0,p.doubleJumpTimer-dt);useBufferedJump(p,dt);
+ if(p.abilityCooldowns)for(const k of Object.keys(p.abilityCooldowns))p.abilityCooldowns[k]=Math.max(0,p.abilityCooldowns[k]-dt*(1+(p.cooldownBonus||0)));if(p.specialAnim){const a=p.specialAnim;if(a.kind==='staff'&&a.element==='void'){for(const e of enemies){if(e.hp<=0)continue;const dx=a.x-(e.x+16),dy=a.y-(e.y+21),dist=Math.hypot(dx,dy);if(dist<170&&dist>2){const pull=Math.min(78*dt,(170-dist)*.8);e.x=Math.max(e.min??0,Math.min(e.max??worldW-32,e.x+dx/dist*pull))}}}a.time=Math.max(0,a.time-dt);if(!a.time){if(a.kind==='staff'){if(p.vortex?.element==='magma'&&p.vortex.x===a.x&&p.vortex.y===a.y)p.vortex.impactLife=p.vortex.life;const fire='#ff642b';burst(a.x,a.y,fire,24);burst(a.x,a.y,'#ffd36a',12);for(let i=-2;i<=2;i++){const px=a.x+i*24;particles.push({x:px,y:a.y,vx:0,vy:-65,life:.42,max:.42,color:i%2?'#ff8c35':'#ffe16a',size:7})}for(const e of enemies){if(e.hp>0&&Math.hypot(e.x+16-a.x,e.y+21-a.y)<100){e.hp=Math.max(0,e.hp-enemyHitDamage(e,2,e.x+16,e.y+21));applyEssenceEffects(e,Math.sign(e.x-a.x));if(stage==='castle'&&e.hp<=0)updateCastleProgress()}}if(boss&&boss.hp>0&&!boss.armor&&Math.hypot(boss.x+boss.w/2-a.x,boss.y+boss.h/2-a.y)<112){boss.hp=Math.max(0,boss.hp-bossHitDamage(boss.x+boss.w/2,boss.y+boss.h/2));applyEssenceEffects(boss,Math.sign(boss.x-a.x));updateHud();if(boss.hp<=0)advanceBossLevel()}}p.specialAnim=null}}p.dropThrough=Math.max(0,p.dropThrough-dt);p.dropAnim=Math.max(0,(p.dropAnim||0)-dt);p.doubleJumpTimer=Math.max(0,p.doubleJumpTimer-dt);useBufferedJump(p,dt);
  p.dashCooldown=Math.max(0,p.dashCooldown-dt);
  p.dashDodgeTimer=Math.max(0,(p.dashDodgeTimer||0)-dt);
  if(p.dashBuffer>0){
@@ -3044,7 +2998,7 @@ function update(dt){if(gameState!=='playing')return;dt=Math.min(dt,.033);if(vict
   if(gameState==='story'||inStoryHub())return;
  }
  const swingProgress=p.swingDuration?1-p.swing/p.swingDuration:0;if(p.weapon==='sword'&&p.onGround&&p.swing>0&&p.swingDamageMultiplier>1&&!p.bigImpactDone&&swingProgress>=.82){p.bigImpactDone=true;const impactX=p.x+p.w/2+p.swingFace*48,surface=platforms.filter(pl=>impactX>=pl.x&&impactX<=pl.x+pl.w&&pl.y>=p.y+p.h-8).sort((a,b)=>a.y-b.y)[0];if(surface)groundScars.push({x:impactX,y:surface.y,life:5,maxLife:5});for(const b of barricades){if(!b.alive||Math.abs((b.x+b.w/2)-impactX)>58)continue;b.hp--;burst(b.x+b.w/2,b.y+24,'#e6c58f',10);if(b.hp<=0){b.alive=false;burst(b.x+b.w/2,b.y+24,'#ffe1a0',18)}}}if(p.weapon==='sword'&&p.swing>0&&swingProgress>=.22&&swingProgress<=.76){enemies.forEach(e=>{if(e.hp>0&&e.type!=='target'&&!p.swingHits.has(e)&&meleeWeaponHitsRect(p,{x:e.x,y:e.y,w:32,h:42})){p.swingHits.add(e);let hitDamage=enemyHitDamage(e,(player.ultimateSword?3:1)*(p.swingDamageMultiplier||1)+essenceDamage(e),e.x+15,e.y+18,false,true,p.swingDamageMultiplier>1);if(hitDamage>0&&e.marked>0){e.marked=0;hitDamage*=3;burst(e.x+16,e.y+18,'#8bf3ff',15);for(const nearby of enemies){if(nearby===e||nearby.hp<=0||Math.hypot(nearby.x-e.x,nearby.y-e.y)>82)continue;nearby.hp=Math.max(0,nearby.hp-enemyHitDamage(nearby,Math.max(1,hitDamage*.5),nearby.x+16,nearby.y+20));burst(nearby.x+16,nearby.y+20,'#8bf3ff',5)}particles.push({x:e.x+16,y:e.y+8,vx:0,vy:-48,life:.7,max:.7,color:'#9bf7ff',size:12,text:'KINETIC DETONATION'})}e.hp=Math.max(0,e.hp-hitDamage);if(hitDamage>0&&p.swingDamageMultiplier>1){interruptEnemy(e,Math.sign(e.x-p.x)||p.swingFace);shake=Math.max(shake,3.2)}applyEssenceEffects(e,p.swingFace);if(e.cosmicBrand>0)detonateCosmicBrand(e);if(stage==='castle'&&e.hp<=0)updateCastleProgress();burst(e.x+15,e.y+18,player.ultimateSword?'#c99cff':'#ffd477',player.ultimateSword?14:7)}});if(boss&&boss.hp>0&&!p.swingHits.has(boss)&&meleeWeaponHitsRect(p,{x:boss.x,y:boss.y+12,w:boss.w,h:boss.h-20})){p.swingHits.add(boss);if(!boss.armor||player.ultimateSword){boss.hp=Math.max(0,boss.hp-bossHitDamage(boss.x+(p.swingFace>0?0:boss.w),boss.y+58,15*(p.swingDamageMultiplier||1),true));applyEssenceEffects(boss,p.swingFace);burst(boss.x+(p.swingFace>0?0:boss.w),boss.y+58,player.ultimateSword?'#c99cff':'#ffd477',player.ultimateSword?14:9);updateHud();if(boss.hp<=0)advanceBossLevel()}else burst(boss.x+boss.w/2,boss.y+58,'#aebfce',6)}}
- for(const s of shards){if(!s.got&&Math.abs((p.x+p.w/2)-s.x)<25&&Math.abs((p.y+p.h/2)-(s.y+Math.sin(performance.now()/260+s.phase)*7.5))<30){s.got=true;sfx('shard');pickupEffects.push({x:s.x,y:s.y,time:0,max:.42,color:level===2?'#a9f27f':(elementColors[currentMode().element]||'#b5fff3')});if(pickupEffects.length>12)pickupEffects.shift();score++;if(stage!=='tutorial'){totalScore++;saveProgress(true);if(score===shardGoal())sfx('gate')}player.ultimateCharge=Math.min(100,(player.ultimateCharge||0)+10);if(level===2)player.hp=Math.min(player.maxHp,player.hp+1);burst(s.x,s.y,level===2?'#a9f27f':'#b5fff3',6);updateHud()}}
+ for(const s of shards){if(!s.got&&Math.abs((p.x+p.w/2)-s.x)<25&&Math.abs((p.y+p.h/2)-(s.y+Math.sin(performance.now()/260+s.phase)*7.5))<30){s.got=true;sfx('shard');pickupEffects.push({x:s.x,y:s.y,time:0,max:.42,color:level===2?'#a9f27f':(elementColors[currentMode().element]||'#b5fff3')});if(pickupEffects.length>12)pickupEffects.shift();score++;if(stage!=='tutorial'){totalScore++;saveProgress(true)}player.ultimateCharge=Math.min(100,(player.ultimateCharge||0)+10);if(level===2)player.hp=Math.min(player.maxHp,player.hp+1);burst(s.x,s.y,level===2?'#a9f27f':'#b5fff3',6);updateHud()}}
  enemies.forEach(e=>{
    if(e.hp<=0||e.type==='target')return;if(e.elite&&e.type!=='staff'){const floor=platforms.filter(pl=>!pl.falling&&e.x+16>pl.x&&e.x+16<pl.x+pl.w&&pl.y>=e.y+42).reduce((best,pl)=>Math.min(best,pl.y),groundY);e.y=floor-42}e.marked=Math.max(0,(e.marked||0)-dt);e.cosmicBrand=Math.max(0,(e.cosmicBrand||0)-dt);e.rooted=Math.max(0,(e.rooted||0)-dt);
    e.impactFlash=Math.max(0,(e.impactFlash||0)-dt);
@@ -3088,7 +3042,7 @@ function update(dt){if(gameState!=='playing')return;dt=Math.min(dt,.033);if(vict
  if(gameState!=='playing')return;
  if(stage==='causeway'&&score>=shardGoal()&&p.x>worldW-140){
   if(level===3)enterBossLevel();else nextCourse();
- }const cameraTarget=Math.max(0,Math.min(worldW-W,p.x-W*.38+p.face*18+Math.max(-24,Math.min(24,p.vx*.045))));camera+=(cameraTarget-camera)*(1-Math.exp(-dt*5.5));p.runDustTimer=Math.max(0,(p.runDustTimer||0)-dt);if(p.onGround&&Math.abs(p.vx)>115&&p.runDustTimer<=0){p.runDustTimer=.16;sfx('step',.27);const theme=stage==='castle'?castleMode:currentMode();particles.push({x:p.x+(p.face>0?3:p.w-3),y:p.y+p.h-2,vx:-p.vx*.12+(Math.random()-.5)*22,vy:-18-Math.random()*24,life:.22,max:.22,color:theme.detail||'#c8b89b',size:1.5+Math.random()});if(particles.length>14)particles.shift()}pickupEffects.forEach(f=>f.time+=dt);pickupEffects=pickupEffects.filter(f=>f.time<f.max);shake=Math.max(0,shake-35*dt);particles=particles.filter(q=>q.life>0);if(particles.length>14)particles.splice(0,particles.length-14);particles.forEach(q=>{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=330*dt;q.rotation=(q.rotation||0)+(q.spin||0)*dt;q.life-=dt});updateAmbient(dt);
+ }const cameraTarget=Math.max(0,Math.min(worldW-W,p.x-W*.38+p.face*18+Math.max(-24,Math.min(24,p.vx*.045))));camera+=(cameraTarget-camera)*(1-Math.exp(-dt*5.5));p.runDustTimer=Math.max(0,(p.runDustTimer||0)-dt);if(p.onGround&&Math.abs(p.vx)>115&&p.runDustTimer<=0){p.runDustTimer=.16;const theme=stage==='castle'?castleMode:currentMode();particles.push({x:p.x+(p.face>0?3:p.w-3),y:p.y+p.h-2,vx:-p.vx*.12+(Math.random()-.5)*22,vy:-18-Math.random()*24,life:.22,max:.22,color:theme.detail||'#c8b89b',size:1.5+Math.random()});if(particles.length>14)particles.shift()}pickupEffects.forEach(f=>f.time+=dt);pickupEffects=pickupEffects.filter(f=>f.time<f.max);shake=Math.max(0,shake-35*dt);particles=particles.filter(q=>q.life>0);if(particles.length>14)particles.splice(0,particles.length-14);particles.forEach(q=>{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=330*dt;q.rotation=(q.rotation||0)+(q.spin||0)*dt;q.life-=dt});updateAmbient(dt);
 }
 function roundRect(x,y,w,h,r){r=Math.max(0,Math.min(r,w/2,h/2));ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r)}
 function roundedRect(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();roundRect(x,y,w,h,r);ctx.fill()}
