@@ -244,22 +244,22 @@ const soundSampleRate=24000;
 // Each voice has a waveform, duration, start/end frequency, level, and optional delay.
 const gameSounds={
  ready:[['bell',.36,392,392,.33],['bell',.42,587,587,.23,.10],['bell',.46,784,784,.20,.19]],
- step:[['noise',.05,740,270,.25],['sine',.06,108,59,.19]],
- jump:[['sine',.15,163,324,.40],['noise',.10,1650,620,.23]],
- doubleJump:[['bell',.20,268,522,.35],['sine',.16,336,658,.24,.047]],
- land:[['noise',.12,1400,220,.36],['sine',.10,102,43,.27]],
- roll:[['noise',.23,460,1450,.49],['sine',.15,113,54,.23]],
- dash:[['noise',.26,550,2900,.43],['sine',.21,371,109,.37]],
- equip:[['noise',.10,850,3100,.26],['bell',.22,506,612,.22,.026]],
- sword:[['noise',.15,990,3100,.45],['sine',.11,360,142,.31]],
- heavySword:[['noise',.25,850,2100,.53],['triangle',.22,179,51,.43]],
- bow:[['triangle',.16,282,94,.44],['noise',.11,4000,850,.25,.02]],
- staff:[['triangle',.24,145,278,.40],['noise',.22,225,925,.44]],
- chakram:[['bell',.25,440,290,.40],['noise',.22,1200,2300,.30]],
+ step:[['noise',.085,2180,630,.48],['triangle',.09,215,115,.36]],
+ jump:[['sine',.22,255,635,.54],['triangle',.16,375,790,.27],['noise',.12,2100,700,.19]],
+ doubleJump:[['bell',.22,404,795,.43],['bell',.25,660,1040,.40,.072]],
+ land:[['noise',.15,1850,680,.42],['triangle',.13,237,92,.49]],
+ roll:[['noise',.28,650,1850,.49],['triangle',.14,270,143,.39],['noise',.14,2570,950,.26,.13]],
+ dash:[['noise',.30,1300,4460,.54],['triangle',.22,597,235,.42],['sine',.20,768,350,.24,.05]],
+ equip:[['noise',.09,1800,3950,.31],['bell',.21,775,867,.37,.036]],
+ sword:[['noise',.18,1600,4100,.46],['bell',.22,1050,790,.35,.025],['triangle',.11,427,203,.27]],
+ heavySword:[['noise',.27,1170,2840,.51],['triangle',.22,270,105,.45],['bell',.28,668,438,.37,.055]],
+ bow:[['triangle',.18,408,173,.48],['noise',.11,4900,1500,.41,.009],['sine',.16,1160,594,.19,.022]],
+ staff:[['triangle',.31,244,390,.43],['noise',.27,680,1790,.49],['bell',.23,348,244,.24,.05]],
+ chakram:[['bell',.35,618,435,.42],['bell',.21,900,680,.25,.11],['noise',.19,2000,3140,.25]],
  catchChakram:[['bell',.25,609,690,.43],['bell',.20,923,850,.26,.03]],
- hit:[['triangle',.10,170,60,.50],['noise',.12,1800,480,.30]],
+ hit:[['triangle',.14,295,128,.52],['noise',.11,2350,705,.38]],
  block:[['bell',.20,621,593,.42],['noise',.09,2640,1810,.24]],
- hurt:[['triangle',.21,240,79,.46],['noise',.17,780,300,.39]],
+ hurt:[['triangle',.22,490,205,.48],['triangle',.18,258,118,.32,.055],['noise',.15,1980,516,.35]],
  counter:[['bell',.28,502,470,.45],['bell',.27,750,720,.31,.055]],
  shard:[['bell',.35,660,660,.47],['bell',.38,988,988,.30,.064],['sine',.42,1320,1320,.25,.13]],
  riptide:[['noise',.44,730,2200,.52],['sine',.37,174,366,.32]],
@@ -267,11 +267,18 @@ const gameSounds={
  magma:[['noise',.59,180,780,.47],['triangle',.58,72,159,.38],['sine',.25,202,95,.28,.18]],
  astral:[['triangle',.49,122,205,.36],['bell',.60,359,286,.36,.08],['sine',.42,517,318,.20,.18]],
  burst:[['noise',.60,2500,410,.54],['triangle',.62,148,39,.41],['bell',.42,541,361,.34,.10]],
- bossWarn:[['triangle',.45,73,161,.38],['triangle',.40,97,209,.33,.14],['noise',.46,230,970,.34]],
+ bossWarn:[['triangle',.42,143,287,.40],['bell',.40,314,466,.35,.13],['noise',.46,530,1370,.29]],
  bossAttack:[['noise',.57,1840,280,.53],['triangle',.61,104,36,.44],['sine',.37,61,38,.31,.08]],
  win:[['bell',.58,392,392,.44],['bell',.67,523,523,.41,.15],['bell',.68,659,659,.32,.29],['bell',.78,784,784,.28,.43]],
  defeat:[['triangle',.46,221,188,.33],['bell',.56,165,151,.38,.17],['sine',.65,110,85,.37,.32]]
 };
+Object.assign(gameSounds,{
+ drop:[['sine',.20,390,163,.43],['noise',.15,1480,690,.28]],
+ magmaImpact:[['triangle',.46,190,70,.42],['noise',.45,1640,440,.50],['bell',.23,525,330,.23,.05]],
+ gate:[['bell',.42,448,447,.46],['bell',.48,671,672,.34,.095],['triangle',.27,181,115,.28]],
+ enemyTell:[['noise',.10,2940,1240,.26],['triangle',.18,708,477,.30]]
+});
+const soundPeak={step:.24,land:.59,hit:.55,equip:.52,shard:.57,enemyTell:.42};
 const soundSteps={step:.20,hit:.069,hurt:.18,block:.11,shard:.072};
 function renderGameSound(name){
  const voices=gameSounds[name];
@@ -297,6 +304,10 @@ function renderGameSound(name){
    samples[offset+i]+=frame*envelope*volume*.7;
   }
  }
+ let peak=0;
+ for(const sample of samples)peak=Math.max(peak,Math.abs(sample));
+ const gain=(soundPeak[name]??.76)/Math.max(peak,.01);
+ for(let i=0;i<samples.length;i++)samples[i]*=gain;
  return samples;
 }
 const soundToggle=document.querySelector('#soundToggle');
@@ -308,7 +319,7 @@ try{soundMuted=localStorage.getItem(soundSetting)==='true'}catch{}
 function updateSoundButton(){
  soundToggle.textContent=soundMuted?'Sound off':'Sound on';
  soundToggle.setAttribute('aria-pressed',String(!soundMuted));
- if(masterSound&&audio)masterSound.gain.setTargetAtTime(soundMuted?0:.4,audio.currentTime,.025);
+ if(masterSound&&audio)masterSound.gain.setTargetAtTime(soundMuted?0:.55,audio.currentTime,.025);
 }
 function unlockSound(){
  if(soundMuted)return;
@@ -318,14 +329,22 @@ function unlockSound(){
   if(!audio){
    audio=new Audio();
    masterSound=audio.createGain();
-   masterSound.gain.value=.4;
-   masterSound.connect(audio.destination);
+   masterSound.gain.value=.55;
+   if(audio.createDynamicsCompressor){
+    const limiter=audio.createDynamicsCompressor();
+    limiter.threshold.value=-8;
+    limiter.ratio.value=10;
+    limiter.attack.value=.004;
+    limiter.release.value=.14;
+    masterSound.connect(limiter);
+    limiter.connect(audio.destination);
+   }else masterSound.connect(audio.destination);
   }
   if(audio.state!=='running')audio.resume().catch(()=>{});
  }catch{}
 }
 function sfx(name,variation=.04){
- if(soundMuted||!masterSound||audio.state!=='running'||voicesPlaying>=12)return;
+ if(soundMuted||!masterSound||audio.state!=='running'||voicesPlaying>=(name==='step'?5:16))return;
  const now=audio.currentTime,previous=lastSound.get(name)??-Infinity;
  if(now-previous<(soundSteps[name]??.045))return;
  let buffer=soundBuffers.get(name);
@@ -341,8 +360,8 @@ function sfx(name,variation=.04){
  voice.playbackRate.value=1+(soundVariationSeed/4294967296-.5)*variation;
  voice.connect(masterSound);
  voice.onended=()=>{voicesPlaying--;voice.disconnect()};
- voice.start();
  voicesPlaying++;
+ voice.start();
  lastSound.set(name,now);
 }
 function setSoundMuted(muted){
@@ -2406,6 +2425,7 @@ function specialAbility(){
 }
 function tryDrop(){
  if(gameState!=='playing'||!player.onGround||player.y+player.h>=groundY-2||player.creatorMode)return;
+ sfx('drop');
  player.dropThrough=.28;
  player.dropAnim=.48;
  player.dropPlatformY=player.y+player.h;
@@ -2556,6 +2576,7 @@ function updateRangedGuard(e,p,dt){
   e.aimY=decoy?decoy.y+24:p.y+p.h/2;
   e.dir=Math.sign(e.aimX-e.x-16)||e.dir;
   e.telegraphArmed=true;
+  if(Math.abs(p.x-e.x)<430)sfx('enemyTell');
   e.windup=stage==='tutorial'?.69:.82;
   return;
  }
@@ -2951,7 +2972,7 @@ function update(dt){if(gameState!=='playing')return;dt=Math.min(dt,.033);if(vict
   p.swordBuffer=Math.max(0,p.swordBuffer-dt);
   if(p.swordBuffer>0&&p.swing<=0&&p.swordCooldown<=0&&p.dashTimer<=0)startSwordSwing(p);
  }
- if(p.abilityCooldowns)for(const k of Object.keys(p.abilityCooldowns))p.abilityCooldowns[k]=Math.max(0,p.abilityCooldowns[k]-dt*(1+(p.cooldownBonus||0)));if(p.specialAnim){const a=p.specialAnim;if(a.kind==='staff'&&a.element==='void'){for(const e of enemies){if(e.hp<=0)continue;const dx=a.x-(e.x+16),dy=a.y-(e.y+21),dist=Math.hypot(dx,dy);if(dist<170&&dist>2){const pull=Math.min(78*dt,(170-dist)*.8);e.x=Math.max(e.min??0,Math.min(e.max??worldW-32,e.x+dx/dist*pull))}}}a.time=Math.max(0,a.time-dt);if(!a.time){if(a.kind==='staff'){if(p.vortex?.element==='magma'&&p.vortex.x===a.x&&p.vortex.y===a.y)p.vortex.impactLife=p.vortex.life;const fire='#ff642b';burst(a.x,a.y,fire,24);burst(a.x,a.y,'#ffd36a',12);for(let i=-2;i<=2;i++){const px=a.x+i*24;particles.push({x:px,y:a.y,vx:0,vy:-65,life:.42,max:.42,color:i%2?'#ff8c35':'#ffe16a',size:7})}for(const e of enemies){if(e.hp>0&&Math.hypot(e.x+16-a.x,e.y+21-a.y)<100){e.hp=Math.max(0,e.hp-enemyHitDamage(e,2,e.x+16,e.y+21));applyEssenceEffects(e,Math.sign(e.x-a.x));if(stage==='castle'&&e.hp<=0)updateCastleProgress()}}if(boss&&boss.hp>0&&!boss.armor&&Math.hypot(boss.x+boss.w/2-a.x,boss.y+boss.h/2-a.y)<112){boss.hp=Math.max(0,boss.hp-bossHitDamage(boss.x+boss.w/2,boss.y+boss.h/2));applyEssenceEffects(boss,Math.sign(boss.x-a.x));updateHud();if(boss.hp<=0)advanceBossLevel()}}p.specialAnim=null}}p.dropThrough=Math.max(0,p.dropThrough-dt);p.dropAnim=Math.max(0,(p.dropAnim||0)-dt);p.doubleJumpTimer=Math.max(0,p.doubleJumpTimer-dt);useBufferedJump(p,dt);
+ if(p.abilityCooldowns)for(const k of Object.keys(p.abilityCooldowns))p.abilityCooldowns[k]=Math.max(0,p.abilityCooldowns[k]-dt*(1+(p.cooldownBonus||0)));if(p.specialAnim){const a=p.specialAnim;if(a.kind==='staff'&&a.element==='void'){for(const e of enemies){if(e.hp<=0)continue;const dx=a.x-(e.x+16),dy=a.y-(e.y+21),dist=Math.hypot(dx,dy);if(dist<170&&dist>2){const pull=Math.min(78*dt,(170-dist)*.8);e.x=Math.max(e.min??0,Math.min(e.max??worldW-32,e.x+dx/dist*pull))}}}a.time=Math.max(0,a.time-dt);if(!a.time){if(a.kind==='staff'){if(a.element==='magma')sfx('magmaImpact');if(p.vortex?.element==='magma'&&p.vortex.x===a.x&&p.vortex.y===a.y)p.vortex.impactLife=p.vortex.life;const fire='#ff642b';burst(a.x,a.y,fire,24);burst(a.x,a.y,'#ffd36a',12);for(let i=-2;i<=2;i++){const px=a.x+i*24;particles.push({x:px,y:a.y,vx:0,vy:-65,life:.42,max:.42,color:i%2?'#ff8c35':'#ffe16a',size:7})}for(const e of enemies){if(e.hp>0&&Math.hypot(e.x+16-a.x,e.y+21-a.y)<100){e.hp=Math.max(0,e.hp-enemyHitDamage(e,2,e.x+16,e.y+21));applyEssenceEffects(e,Math.sign(e.x-a.x));if(stage==='castle'&&e.hp<=0)updateCastleProgress()}}if(boss&&boss.hp>0&&!boss.armor&&Math.hypot(boss.x+boss.w/2-a.x,boss.y+boss.h/2-a.y)<112){boss.hp=Math.max(0,boss.hp-bossHitDamage(boss.x+boss.w/2,boss.y+boss.h/2));applyEssenceEffects(boss,Math.sign(boss.x-a.x));updateHud();if(boss.hp<=0)advanceBossLevel()}}p.specialAnim=null}}p.dropThrough=Math.max(0,p.dropThrough-dt);p.dropAnim=Math.max(0,(p.dropAnim||0)-dt);p.doubleJumpTimer=Math.max(0,p.doubleJumpTimer-dt);useBufferedJump(p,dt);
  p.dashCooldown=Math.max(0,p.dashCooldown-dt);
  p.dashDodgeTimer=Math.max(0,(p.dashDodgeTimer||0)-dt);
  if(p.dashBuffer>0){
@@ -2998,7 +3019,7 @@ function update(dt){if(gameState!=='playing')return;dt=Math.min(dt,.033);if(vict
   if(gameState==='story'||inStoryHub())return;
  }
  const swingProgress=p.swingDuration?1-p.swing/p.swingDuration:0;if(p.weapon==='sword'&&p.onGround&&p.swing>0&&p.swingDamageMultiplier>1&&!p.bigImpactDone&&swingProgress>=.82){p.bigImpactDone=true;const impactX=p.x+p.w/2+p.swingFace*48,surface=platforms.filter(pl=>impactX>=pl.x&&impactX<=pl.x+pl.w&&pl.y>=p.y+p.h-8).sort((a,b)=>a.y-b.y)[0];if(surface)groundScars.push({x:impactX,y:surface.y,life:5,maxLife:5});for(const b of barricades){if(!b.alive||Math.abs((b.x+b.w/2)-impactX)>58)continue;b.hp--;burst(b.x+b.w/2,b.y+24,'#e6c58f',10);if(b.hp<=0){b.alive=false;burst(b.x+b.w/2,b.y+24,'#ffe1a0',18)}}}if(p.weapon==='sword'&&p.swing>0&&swingProgress>=.22&&swingProgress<=.76){enemies.forEach(e=>{if(e.hp>0&&e.type!=='target'&&!p.swingHits.has(e)&&meleeWeaponHitsRect(p,{x:e.x,y:e.y,w:32,h:42})){p.swingHits.add(e);let hitDamage=enemyHitDamage(e,(player.ultimateSword?3:1)*(p.swingDamageMultiplier||1)+essenceDamage(e),e.x+15,e.y+18,false,true,p.swingDamageMultiplier>1);if(hitDamage>0&&e.marked>0){e.marked=0;hitDamage*=3;burst(e.x+16,e.y+18,'#8bf3ff',15);for(const nearby of enemies){if(nearby===e||nearby.hp<=0||Math.hypot(nearby.x-e.x,nearby.y-e.y)>82)continue;nearby.hp=Math.max(0,nearby.hp-enemyHitDamage(nearby,Math.max(1,hitDamage*.5),nearby.x+16,nearby.y+20));burst(nearby.x+16,nearby.y+20,'#8bf3ff',5)}particles.push({x:e.x+16,y:e.y+8,vx:0,vy:-48,life:.7,max:.7,color:'#9bf7ff',size:12,text:'KINETIC DETONATION'})}e.hp=Math.max(0,e.hp-hitDamage);if(hitDamage>0&&p.swingDamageMultiplier>1){interruptEnemy(e,Math.sign(e.x-p.x)||p.swingFace);shake=Math.max(shake,3.2)}applyEssenceEffects(e,p.swingFace);if(e.cosmicBrand>0)detonateCosmicBrand(e);if(stage==='castle'&&e.hp<=0)updateCastleProgress();burst(e.x+15,e.y+18,player.ultimateSword?'#c99cff':'#ffd477',player.ultimateSword?14:7)}});if(boss&&boss.hp>0&&!p.swingHits.has(boss)&&meleeWeaponHitsRect(p,{x:boss.x,y:boss.y+12,w:boss.w,h:boss.h-20})){p.swingHits.add(boss);if(!boss.armor||player.ultimateSword){boss.hp=Math.max(0,boss.hp-bossHitDamage(boss.x+(p.swingFace>0?0:boss.w),boss.y+58,15*(p.swingDamageMultiplier||1),true));applyEssenceEffects(boss,p.swingFace);burst(boss.x+(p.swingFace>0?0:boss.w),boss.y+58,player.ultimateSword?'#c99cff':'#ffd477',player.ultimateSword?14:9);updateHud();if(boss.hp<=0)advanceBossLevel()}else burst(boss.x+boss.w/2,boss.y+58,'#aebfce',6)}}
- for(const s of shards){if(!s.got&&Math.abs((p.x+p.w/2)-s.x)<25&&Math.abs((p.y+p.h/2)-(s.y+Math.sin(performance.now()/260+s.phase)*7.5))<30){s.got=true;sfx('shard');pickupEffects.push({x:s.x,y:s.y,time:0,max:.42,color:level===2?'#a9f27f':(elementColors[currentMode().element]||'#b5fff3')});if(pickupEffects.length>12)pickupEffects.shift();score++;if(stage!=='tutorial'){totalScore++;saveProgress(true)}player.ultimateCharge=Math.min(100,(player.ultimateCharge||0)+10);if(level===2)player.hp=Math.min(player.maxHp,player.hp+1);burst(s.x,s.y,level===2?'#a9f27f':'#b5fff3',6);updateHud()}}
+ for(const s of shards){if(!s.got&&Math.abs((p.x+p.w/2)-s.x)<25&&Math.abs((p.y+p.h/2)-(s.y+Math.sin(performance.now()/260+s.phase)*7.5))<30){s.got=true;sfx('shard');pickupEffects.push({x:s.x,y:s.y,time:0,max:.42,color:level===2?'#a9f27f':(elementColors[currentMode().element]||'#b5fff3')});if(pickupEffects.length>12)pickupEffects.shift();score++;if(stage!=='tutorial'){totalScore++;saveProgress(true);if(score===shardGoal())sfx('gate')}player.ultimateCharge=Math.min(100,(player.ultimateCharge||0)+10);if(level===2)player.hp=Math.min(player.maxHp,player.hp+1);burst(s.x,s.y,level===2?'#a9f27f':'#b5fff3',6);updateHud()}}
  enemies.forEach(e=>{
    if(e.hp<=0||e.type==='target')return;if(e.elite&&e.type!=='staff'){const floor=platforms.filter(pl=>!pl.falling&&e.x+16>pl.x&&e.x+16<pl.x+pl.w&&pl.y>=e.y+42).reduce((best,pl)=>Math.min(best,pl.y),groundY);e.y=floor-42}e.marked=Math.max(0,(e.marked||0)-dt);e.cosmicBrand=Math.max(0,(e.cosmicBrand||0)-dt);e.rooted=Math.max(0,(e.rooted||0)-dt);
    e.impactFlash=Math.max(0,(e.impactFlash||0)-dt);
