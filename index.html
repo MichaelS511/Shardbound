@@ -174,7 +174,7 @@
   <canvas id="game" aria-label="Side scrolling knight platform game"></canvas>
   <div class="hud"><div><div class="brand">Shardbound</div><div class="score"><span id="score">0</span> <small>／ 10 SHARDS</small></div><div class="weapon" id="weapon">SWORD [1]</div></div><div class="right-hud"><div class="health"><div class="health-track"><div class="health-fill" id="healthFill"></div></div><span id="healthText">20 / 20</span></div><div class="progress" id="progress">WORLD 1 · LEVEL 1 / 3</div><div class="ability" id="ability">GRASSLAND</div></div></div>
   <div class="touch" aria-label="Touch game controls"><div class="cluster" aria-label="Movement controls"><button aria-label="Move left" data-key="ArrowLeft">←</button><button aria-label="Move right" data-key="ArrowRight">→</button><button aria-label="Jump / double jump" data-key="Space">↑</button><button aria-label="Drop through platform" data-action="drop">↓</button></div><div class="weapons" aria-label="Weapon selection"><button aria-label="Select Riptide Katana" data-weapon="sword">1</button><button aria-label="Select bow" data-weapon="bow">2</button><button aria-label="Select shardstaff" data-weapon="staff">3</button><button aria-label="Select Tide of the Stars chakram" data-weapon="chakram">4</button></div><div class="actions" aria-label="Combat actions"><button aria-label="Attack; sword combo is small, small, big" data-action="attack">⚔</button><button aria-label="Weapon ability" data-action="special">E</button><button aria-label="Dash" data-action="dash">Q</button><button aria-label="Shard burst" data-action="burst">R</button><button aria-label="Pause" data-action="pause">Ⅱ</button></div></div>
-  <div class="overlay" id="overlay"><div class="card"><div class="eyebrow">The elements awaken</div><h1>Shardbound</h1><p id="introText">Oh no! The guardians took the shiny shards. Grab your weapons, bonk the bad guys, and reclaim them across 15 elemental stages!</p><div class="keys" id="keySummary"><div class="key"><b>WASD / TOUCH</b><span>Move / jump / drop</span></div><div class="key"><b>1 / 2 / 3 / 4</b><span>Choose weapon</span></div><div class="key"><b>Tap / click</b><span>Attack</span></div><div class="key"><b>E / Q</b><span>Ability / dash</span></div></div><div class="mode-buttons"><button class="button" id="start" type="button" onclick="return window.shardboundShowDeviceChoice(event)">Begin journey</button><button class="button mode-secondary" id="storyStart" type="button">Story Mode</button><button class="button mode-secondary" id="endlessStart" type="button">Endless</button><button class="button mode-secondary" id="tutorialStart" type="button">Tutorial</button></div><button class="story-skip mode-link hidden" id="storyQuit" type="button">Return to title</button><div class="device-choice hidden" id="deviceChoice" aria-label="Choose a control mode"><button class="button" id="pcStart" type="button" onclick="return window.shardboundSelectDevice('pc',event)" onpointerdown="return window.shardboundSelectDevice('pc',event)">PC / Laptop</button><button class="button" id="mobileStart" type="button" onclick="return window.shardboundSelectDevice('mobile',event)" onpointerdown="return window.shardboundSelectDevice('mobile',event)">Mobile</button></div><p class="note" id="gameNote">Find the shiny shards, beat the big bosses, and save the worlds. You can do it!</p></div></div>
+  <div class="overlay" id="overlay"><div class="card"><div class="eyebrow">The elements awaken</div><h1>Shardbound</h1><p id="introText">Oh no! The guardians took the shiny shards. Grab your weapons, bonk the bad guys, and reclaim them across 15 elemental stages!</p><div class="keys" id="keySummary"><div class="key"><b>WASD / TOUCH</b><span>Move / jump / drop</span></div><div class="key"><b>1 / 2 / 3 / 4</b><span>Choose weapon</span></div><div class="key"><b>Tap / click</b><span>Attack</span></div><div class="key"><b>E / Q</b><span>Ability / dash</span></div></div><div class="mode-buttons"><button class="button" id="start" type="button" onclick="return window.shardboundShowDeviceChoice(event)">Begin journey</button><button class="button mode-secondary" id="storyStart" type="button">Story Mode</button><button class="button mode-secondary" id="endlessStart" type="button">Endless</button><button class="button mode-secondary" id="rematchStart" type="button">Boss Rematches</button><button class="button mode-secondary" id="practiceStart" type="button">Practice Arena</button><button class="button mode-secondary" id="tutorialStart" type="button">Tutorial</button></div><button class="story-skip mode-link hidden" id="storyQuit" type="button">Return to title</button><div class="device-choice hidden" id="deviceChoice" aria-label="Choose a control mode"><button class="button" id="pcStart" type="button" onclick="return window.shardboundSelectDevice('pc',event)" onpointerdown="return window.shardboundSelectDevice('pc',event)">PC / Laptop</button><button class="button" id="mobileStart" type="button" onclick="return window.shardboundSelectDevice('mobile',event)" onpointerdown="return window.shardboundSelectDevice('mobile',event)">Mobile</button></div><p class="note" id="gameNote">Find the shiny shards, beat the big bosses, and save the worlds. You can do it!</p></div></div>
   <div class="tutorial-tip hidden" id="tutorialTip"><span role="status" id="tutorialText"></span><div class="tutorial-actions"><button id="tutorialSkip" type="button">Skip drill</button><button id="tutorialDismiss" type="button">Exit tutorial</button></div></div>
   <button type="button" class="button story-action hidden" id="storyAction"></button>
   <button type="button" class="button story-action hidden" id="campaignTrialStart"></button>
@@ -206,6 +206,7 @@ window.shardboundShowDeviceChoice=function(event){
   if(keys)keys.classList.add('hidden');
   if(note)note.textContent='Choose PC / Laptop or Mobile to start your journey.';
   document.getElementById('tutorialStart').classList.add('hidden');
+  for(const id of ['rematchStart','practiceStart'])document.getElementById(id).classList.add('hidden');
   document.getElementById('storyStart').classList.add('hidden');
   document.getElementById('endlessStart').classList.add('hidden');
   start.classList.add('hidden');choices.classList.remove('hidden');choices.setAttribute('aria-hidden','false');
@@ -688,7 +689,7 @@ function loadStoryCheckpoint(){
   const savedVisitorRegion=checkpoint.visitorRegion;
   const visitorRegion=Number.isInteger(savedVisitorRegion)&&routes[savedVisitorRegion-1]?.has(2)?savedVisitorRegion:0;
   if(!answeredAlarm&&!restored.size&&!routes.some(route=>route.size))return null;
-  return {restored,routes,answeredAlarm,visitorRegion,visitors:visitorRegion?makeTownVisitors(visitorRegion):[]};
+  return {restored,routes,answeredAlarm,visitorRegion,rumors:readStoryIds(checkpoint.rumors,storyRegions.length),visitors:visitorRegion?makeTownVisitors(visitorRegion):[]};
  }catch{return null}
 }
 function saveStoryCheckpoint(){
@@ -698,14 +699,15 @@ function saveStoryCheckpoint(){
    restored:[...storyProgress.restored],
    routes:storyProgress.routes.map(route=>[...route]),
    answeredAlarm:storyProgress.answeredAlarm,
-   visitorRegion:storyProgress.visitorRegion
+   visitorRegion:storyProgress.visitorRegion,
+   ...(storyProgress.rumors?.size?{rumors:[...storyProgress.rumors]}:{})
   }));
  }catch{}
 }
 function startStory(){
  const checkpoint=pendingStoryCheckpoint;
  pendingStoryCheckpoint=null;
- storyProgress=checkpoint||{restored:new Set(),routes:storyRegions.map(()=>new Set()),answeredAlarm:false,visitorRegion:0,visitors:[]};
+ storyProgress=checkpoint||{restored:new Set(),routes:storyRegions.map(()=>new Set()),answeredAlarm:false,visitorRegion:0,rumors:new Set(),visitors:[]};
  enterStoryTown(!!checkpoint);
 }
 
@@ -754,7 +756,7 @@ function enterGroundedStage(hub,width,spawnX){
 function placePlayerOnGround(x){
  Object.assign(player,{x,y:groundY-player.h,vx:0,vy:0,face:1,onGround:true,jumps:0,
   jumpBuffer:0,jumpHold:0,coyote:0,dropThrough:0,dropSurface:null,dropPlatformY:null,dropAnim:0,doubleJumpTimer:0,
-  dashTimer:0,dashBuffer:0,dashTrail:null,dashDodgeTimer:0,airDash:false,counterTimer:0,burstArt:null,swordBuffer:0,swordComboTimer:0,swing:0,specialAnim:null,attackAnim:null,undertow:null,vortex:null,
+  dashTimer:0,dashBuffer:0,downStrike:0,dashTrail:null,dashDodgeTimer:0,airDash:false,counterTimer:0,burstArt:null,swordBuffer:0,swordComboTimer:0,swing:0,specialAnim:null,attackAnim:null,undertow:null,vortex:null,
   creatorMode:false,invuln:0,lastSafeX:x,lastSafeY:groundY-player.h});
  camera=Math.max(0,Math.min(worldW-W,x-W*.38));
  shake=0;
@@ -1004,10 +1006,29 @@ function completeStoryRoute(){
 function talkToTownsperson(person){
  const count=storyProgress.restored.size;
  const line=count===0?person.before:count===storyRegions.length?person.after:person.during;
- showStoryScene('Beacon Town',person.name,[[`${person.name}, ${person.role}`,line,person]]);
+ const room=secretRooms[storyProgress.visitors.indexOf(person)];
+ const rumor=room&&storyProgress.restored.has(room.region)&&weaponFinishes[room.weapon]!==room.finish;
+ if(rumor){
+  storyProgress.rumors.add(room.region);
+  saveStoryCheckpoint();
+ }
+ showStoryScene('Beacon Town',person.name,[[`${person.name}, ${person.role}`,rumor?room.rumor:line,person]]);
+
 }
 
 function nearbyStoryStop(){
+ const x=player.x+player.w/2;
+ if(stage==='practice')return {label:'Reset practice',action:startPractice};
+ if(stage==='secret'&&storySecret){
+  const room=storySecret,feet=player.y+player.h;
+  if(Math.abs(x-room.x)<57&&Math.abs(feet-room.y)<56)return {label:`Claim ${room.finish}`,action:()=>uncoverSecret(room)};
+  if(x<169)return {label:'Return to town',action:()=>enterStoryTown(true)};
+  return null;
+ }
+ if(stage==='storyCamp'&&canVisitSecret(world)){
+  const room=secretRooms.find(secret=>secret.region===world);
+  if(Math.abs(x-room.hatch)<68)return {label:'Inspect the old entrance',action:()=>enterSecret(room)};
+ }
  if(stage==='storyMission')return missionStop();
  if(!inStoryHub())return null;
  const stops=stage==='town'?(storyProgress?.answeredAlarm?townStops:[townAlarm,...townStops]):campStops;
@@ -1066,8 +1087,8 @@ function openStoryTravel(){
  travelTown.classList.toggle('hidden',inTown);
  if(inTown){
   storyRegions.forEach((name,index)=>{
-   const region=index+1,done=restored.has(region),locked=region===5&&restored.size<4;
-   const option=addTravelOption(name,done?'Channel restored':locked?'Opens after the four outer regions':'Travel to field camp',!done&&!locked,()=>{
+   const region=index+1,done=restored.has(region),locked=region===5&&restored.size<4,secret=canVisitSecret(region);
+   const option=addTravelOption(name,secret?'Follow the rumor from town':done?'Channel restored':locked?'Opens after the four outer regions':'Travel to field camp',(secret||!done)&&!locked,()=>{
     enterStoryCamp(region);
     openStoryTravel();
    });
@@ -1330,7 +1351,7 @@ let platforms,shards,enemies,arrows,shots,fireballs,boss,bossHazards,courseHazar
 function loadSaveStats(key='shardboundSave'){try{return JSON.parse(localStorage.getItem(key))||{bestShards:0,furthestCourse:0,lifetimeShards:0}}catch{return{bestShards:0,furthestCourse:0,lifetimeShards:0}}}
 // Accessibility preferences are local and apply immediately to play and menus.
 let storyStats=loadSaveStats('shardboundStorySave');
-function saveProgress(collected=false){try{const isStory=gameMode==='story',stats=isStory?storyStats:saveStats;stats.bestShards=Math.max(stats.bestShards||0,totalScore||0);stats.furthestCourse=Math.max(stats.furthestCourse||0,courseIndex()+1);if(collected)stats.lifetimeShards=(stats.lifetimeShards||0)+1;localStorage.setItem(isStory?'shardboundStorySave':'shardboundSave',JSON.stringify(stats))}catch{}}
+function saveProgress(collected=false){if(gameMode!=='campaign'&&gameMode!=='story')return;try{const isStory=gameMode==='story',stats=isStory?storyStats:saveStats;stats.bestShards=Math.max(stats.bestShards||0,totalScore||0);stats.furthestCourse=Math.max(stats.furthestCourse||0,courseIndex()+1);if(collected)stats.lifetimeShards=(stats.lifetimeShards||0)+1;localStorage.setItem(isStory?'shardboundStorySave':'shardboundSave',JSON.stringify(stats))}catch{}}
 const worldModes=[
  {name:'EMBERFALL',element:'fire',biome:'lava',ability:'METEOR SHOWERS · EMBER WOLVES',sky:['#562d38','#b95342','#f0a04a'],hill1:'#c65e3e',hill2:'#703b43',side:'#693b3a',top:'#e17748',detail:'#ffc36b',grass:'#c75c39',wall:'#4b303c',animal:'emberwolf'},
  {name:'BRIARWILD',element:'grass',biome:'forest',ability:'SPRINGBLOOM LAUNCH PADS · BRIAR WOLVES',sky:['#537e52','#9dc77a','#e2d88c'],hill1:'#8bc774',hill2:'#4f995e',side:'#3d6845',top:'#a9d96b',detail:'#79ad55',grass:'#76bd56',wall:'#345b40',animal:'briarwolf'},
@@ -1584,7 +1605,33 @@ function chakramInFlight(){
  return shots.some(shot=>shot.type==='chakram'&&shot.life>0);
 }
 function updateWeaponHud(){if(!player||inStoryHub())return;const weapon=player.weapon,chakram=weapon==='chakram'&&shots.find(shot=>shot.type==='chakram'&&shot.life>0),key=weapon==='staff'?'staff':weapon==='bow'?'bow':weapon==='chakram'?'chakram':'sword',label=weapon==='staff'?'MAGMAHEART SURGE':weapon==='bow'?'GLACIERFANG VOLLEY':weapon==='chakram'?'ASTRAL UNDERFLOW':'RIPTIDE CROSSCURRENT',cooldown=player.abilityCooldowns?.[key]||0;const base=weapon==='sword'?`RIPTIDE KATANA [1]${player.swordCooldown>0?` · ${player.swordCooldown.toFixed(1)}s`:''}${player.ultimateSword?' · ULTIMATE':''}`:weapon==='chakram'?`TIDE OF THE STARS [4]${chakram?(chakram.returning?' · RETURNING':' · IN FLIGHT'):player.chakramCooldown>0?` · ${player.chakramCooldown.toFixed(1)}s`:''}`:weapon==='bow'?`FROSTFANG BOW [2] · ∞${player.bowCooldown>0?` · RELOADING ${Math.ceil(player.bowCooldown)}s`:''}`:`UNDERGROUND FLAME STAFF [3]${player.staffCooldown>0?` · RECHARGING ${Math.ceil(player.staffCooldown)}s`:''}`;const text=`${base} · BURST ${Math.floor(player.ultimateCharge||0)}% · E ${label} ${cooldown>0?`${cooldown.toFixed(1)}s`:'READY'} · Q DASH ${player.dashCooldown>0?`${player.dashCooldown.toFixed(1)}s`:'READY'}${player.counterTimer>0?` · COUNTER +50% ${player.counterTimer.toFixed(1)}s`:''}`;if(weaponEl.textContent!==text)weaponEl.textContent=text}
-function updateHud(){if(stage==='endless'&&endlessRun){updateEndlessHud();return}if(stage==='storyMission'&&storyMission){
+function updateHud(){
+ if(stage==='practice'&&practice){
+  brandEl.textContent='PRACTICE ARENA';
+  scoreEl.textContent=Number(practice.damage.toFixed(1));
+  scoreLabelEl.textContent='TOTAL DAMAGE';
+  progressEl.textContent=`CHAIN ${Number(practice.chain.toFixed(1))} · BEST ${Number(practice.best.toFixed(1))}`;
+  abilityEl.textContent=`RETURN HITS ${practice.rebound} · DOWN + ATTACK IN AIR`;
+  healthFillEl.style.width='100%';healthTextEl.textContent=`${player.hp} / ${player.maxHp}`;
+  updateWeaponHud();return;
+ }
+ if(stage==='secret'&&storySecret){
+  brandEl.textContent=storySecret.title.toUpperCase();
+  scoreEl.textContent='';scoreLabelEl.textContent='';
+  progressEl.textContent=`FIND THE ${storySecret.finish.toUpperCase()} FINISH`;
+  abilityEl.textContent=selectedDevice==='pc'?'F · INTERACT':'USE THE INTERACTION BUTTON';
+  healthFillEl.style.width=`${player.hp/player.maxHp*100}%`;healthTextEl.textContent=`${player.hp} / ${player.maxHp}`;
+  updateWeaponHud();return;
+ }
+ if(rematch&&boss){
+  brandEl.textContent='BOSS REMATCH';
+  scoreEl.textContent=rematch.seconds.toFixed(1);scoreLabelEl.textContent='SEC';
+  healthFillEl.style.width=`${player.hp/player.maxHp*100}%`;healthTextEl.textContent=`${player.hp} / ${player.maxHp}`;
+  progressEl.textContent=`${boss.name.toUpperCase()} · ${Math.ceil(boss.hp)}/${boss.maxHp}`;
+  abilityEl.textContent=`${rematch.hit?'':'NO HIT · '}${rematch.weapon?rematch.weapon.toUpperCase()+' ONLY':'OPEN LOADOUT'}`;
+  updateWeaponHud();return;
+ }
+ if(stage==='endless'&&endlessRun){updateEndlessHud();return}if(stage==='storyMission'&&storyMission){
  const mission=storyMission;
  const objective=mission.route===1?'RELAYS ONLINE':mission.route===2?'PEOPLE RESCUED':'WAVES CLEARED';
  const count=mission.route===3?mission.wave-(mission.phase==='wave'?1:0):
@@ -1636,7 +1683,7 @@ function pauseGame(){
  startBtn.classList.remove('hidden');
  deviceChoice.classList.add('hidden');
  deviceChoice.setAttribute('aria-hidden','true');
- storyQuit.classList.toggle('hidden',gameMode!=='story'&&gameMode!=='endless');
+ storyQuit.classList.toggle('hidden',gameMode==='campaign'||gameMode==='tutorial');
  storyQuit.textContent=stage==='storyMission'?'Return to field camp':'Return to title';
  gameNote.textContent='';
  overlay.classList.remove('hidden');
@@ -1660,7 +1707,7 @@ const bossVariants=[
 ];
 function setupBoss(){const spec=groupBosses[world-1],mode=currentMode();boss={x:worldW-500,y:groundY-150,baseY:groundY-150,w:160,h:150,hp:spec.hp,maxHp:spec.hp,attackTimer:1.6,attackCount:0,specialCount:0,specialTimer:3.8,armor:false,armorTimer:0,gravityField:0,face:1,name:spec.name,worldBoss:true,bossWorld:world,element:spec.element,elements:spec.elements,exposed:0,colors:mode,moveClock:0,moveDir:-1,chargeTimer:0,chargeCooldown:2.2,chargeDir:-1,swordSwing:0,swordQueued:false};arrows=[];shots=[];fireballs=[];bossHazards=[];particles=[];camera=Math.max(0,Math.min(worldW-W,player.x-W*.38));updateHud()}
 function enterBossLevel(){decoys=[];saws=[];barricades=[];stage='boss';arena={left:worldW-840,right:worldW-100,portal:{x:worldW-785,y:groundY-88,w:56,h:88}};platforms=[{x:arena.left,y:groundY,w:arena.right-arena.left,h:100}];enemies=[];player.hp=player.maxHp;player.regenTimer=0;player.x=worldW-230;player.y=groundY-player.h;player.vx=0;player.vy=0;player.face=-1;player.onGround=true;player.jumps=0;player.doubleJumpTimer=0;player.lastSafeX=player.x;player.lastSafeY=player.y;saveProgress();setupBoss();if(gameMode==='story')showStoryGuardian(false)}
-function advanceBossLevel(){if(!boss||boss.portalActive)return;boss.hp=0;boss.portalActive=true;boss.swordSwing=0;boss.armor=false;boss.gravityField=0;fireballs=[];shots=[];arrows=[];bossHazards=[];player.hp=player.maxHp;player.regenTimer=0;if(gameMode==='story'&&boss.worldBoss)showStoryGuardian(true,showUpgradeChoices);else showUpgradeChoices();updateHud()}
+function advanceBossLevel(){if(!boss||boss.portalActive)return;boss.hp=0;if(rematch){finishRematch(true);return}if(boss.finalBoss||boss.worldBoss)rememberGuardian(boss.finalBoss?6:boss.bossWorld);boss.portalActive=true;boss.swordSwing=0;boss.armor=false;boss.gravityField=0;fireballs=[];shots=[];arrows=[];bossHazards=[];player.hp=player.maxHp;player.regenTimer=0;if(gameMode==='story'&&boss.worldBoss)showStoryGuardian(true,showUpgradeChoices);else showUpgradeChoices();updateHud()}
 const upgradeModal=document.createElement('div');
 upgradeModal.className='upgrade-modal hidden';
 upgradeModal.setAttribute('role','dialog');
@@ -1715,6 +1762,253 @@ function showUpgradeChoices({
  upgradeModal.classList.remove('hidden');
  firstChoice?.focus({preventScroll:true});
 }
+const arcadeButtons=[['rematchStart','rematch'],['practiceStart','practice']].map(([id,mode])=>{
+ const button=document.getElementById(id);
+ button.addEventListener('click',event=>{
+  requestedMode=mode;
+  window.shardboundShowDeviceChoice(event);
+ });
+ return button;
+});
+const arcadeWeapons=[['sword','Sword'],['bow','Bow'],['staff','Staff'],['chakram','Chakram']];
+const rematchKey='shardboundRematches',finishKey='shardboundWeaponFinishes';
+let rematch=null,practice=null,storySecret=null;
+function readArcadeData(key){
+ try{
+  const data=JSON.parse(localStorage.getItem(key));
+  return data&&typeof data==='object'&&!Array.isArray(data)?data:{};
+ }catch{return {}}
+}
+function saveArcadeData(key,data){try{localStorage.setItem(key,JSON.stringify(data))}catch{}}
+const rematchRecords=readArcadeData(rematchKey),weaponFinishes=readArcadeData(finishKey);
+const secretRooms=[
+ {region:1,title:'The Quenched Vault',weapon:'sword',finish:'Emberglass',filter:'hue-rotate(152deg) saturate(1.25)',hatch:212,
+  rumor:'A forge vent on the west side of Emberfall’s field camp hides a stairway. Follow the old brickwork.',
+  ledges:[[183,385,108],[332,343,106],[480,310,97],[630,280,143]],x:698,y:280},
+ {region:2,title:'The Glass Bell',weapon:'bow',finish:'Stormglass',filter:'hue-rotate(58deg) saturate(1.25)',hatch:766,
+  rumor:'Try the old bell on the east side of the Stormlands field camp. There’s a room beneath it.',
+  ledges:[[175,392,115],[319,350,112],[473,300,111],[625,350,120],[776,310,99]],x:827,y:310},
+ {region:3,title:'The Starlit Cistern',weapon:'chakram',finish:'Moonstone',filter:'hue-rotate(92deg) saturate(1.21)',hatch:271,
+  rumor:'The well on the west side of the Frostbound camp drains into a chamber under the road.',
+  ledges:[[205,334,100],[345,385,110],[477,345,115],[623,284,108],[769,255,105]],x:813,y:255}
+];
+
+function rememberGuardian(id){
+ if(gameMode!=='campaign'&&gameMode!=='story')return;
+ rematchRecords[id]={...rematchRecords[id],unlocked:true};
+ saveArcadeData(rematchKey,rematchRecords);
+}
+
+function returnToArcadeTitle(){
+ storySaveMenuBack=null;
+ storyScene.classList.add('hidden');
+ overlay.classList.remove('hidden');
+ resetJourneyPrompt();
+ gameState='title';
+ syncCursor();
+ startBtn.focus({preventScroll:true});
+}
+
+function showRematchPanel(title,note,options,back=returnToArcadeTitle){
+ gameState='story';
+ keys={};
+ syncCursor();
+ storyDialogue=null;
+ storySaveMenuBack=back;
+ storyScene.dataset.view='travel';
+ storyChapter.textContent='Boss Rematch Hall';
+ storyTitle.textContent=title;
+ travelNote.textContent=note;
+ travelTown.classList.add('hidden');
+ travelOptions.replaceChildren();
+ let first=null;
+ for(const {label,detail,enabled=true,action} of options){
+  const button=addTravelOption(label,detail,enabled,()=>{
+   storySaveMenuBack=null;
+   action();
+  });
+  first=first||button;
+ }
+ storyScene.classList.remove('hidden');
+ (first||travelBack).focus({preventScroll:true});
+}
+
+function openRematchHall(){
+ const restored=loadStoryCheckpoint()?.restored;
+ const unlocked=id=>rematchRecords[id]?.unlocked===true||id<=5&&
+  (restored?.has(id)||(saveStats.furthestCourse||0)>id*3);
+ const options=[...groupBosses.map((guardian,i)=>({id:i+1,name:guardian.name})),{id:6,name:'The Keep’s Final Boss'}]
+  .map(({id,name})=>{
+   const record=rematchRecords[id],medals=arcadeWeapons.filter(([key])=>record?.weapons?.[key]).length;
+   return {label:name,enabled:unlocked(id),detail:Number.isFinite(record?.best)?
+    `Best ${record.best.toFixed(1)}s · ${medals}/4 weapon medals${record.speed?' · Speed':''}${record.noHit?' · No hit':''}`:
+    unlocked(id)?'Choose a loadout':'Defeat this boss to unlock',action:()=>chooseRematchLoadout(id,name)};
+  });
+ showRematchPanel('Choose a guardian','Earn a speed medal under 90 seconds, a no-hit medal, and one medal per fixed weapon. Open loadout allows switching.',options);
+}
+
+function chooseRematchLoadout(id,name){
+ const launch=(weapon,label,detail)=>({label,detail,action:()=>startRematch(id,name,weapon)});
+ const options=arcadeWeapons.map(([key,label])=>launch(key,label,rematchRecords[id]?.weapons?.[key]?'Weapon medal earned':'Keep this weapon equipped'));
+ options.push(launch(null,'Open loadout','Switch weapons freely'));
+ showRematchPanel(name,'Choose your weapon for this duel.',options,openRematchHall);
+}
+
+function startRematch(id,name,weapon){
+ reset();
+ rematch={id,name,weapon,seconds:0,hit:false};
+ gameMode='rematch';
+ world=Math.min(id,5);level=3;
+ if(id===6){
+  startFinalBoss();
+  camera=Math.max(0,worldW-W);
+ }else enterBossLevel();
+ player.weapon=weapon||'sword';
+ player.weaponEquipTimer=0;
+ resumeStoryPlay();
+ updateHud();
+}
+
+function finishRematch(won){
+ const {id,name,weapon,seconds,hit}=rematch;
+ const record=rematchRecords[id]||{unlocked:true};
+ if(won){
+  record.best=Number.isFinite(record.best)?Math.min(record.best,seconds):seconds;
+  record.noHit=record.noHit||!hit;
+  record.speed=record.speed||seconds<90;
+  if(weapon)record.weapons={...record.weapons,[weapon]:true};
+  rematchRecords[id]=record;
+  saveArcadeData(rematchKey,rematchRecords);
+ }
+ rematch=null;
+ arrows=[];shots=[];fireballs=[];bossHazards=[];
+ const medals=[won&&seconds<90&&'Speed medal',won&&!hit&&'No-hit medal',won&&weapon&&`${arcadeWeapons.find(([key])=>key===weapon)[1]} medal`].filter(Boolean);
+ showRematchPanel(won?'Guardian defeated':'Duel lost',`${seconds.toFixed(1)}s${medals.length?' · '+medals.join(' · '):''}`,[
+  {label:'Rematch',detail:name,action:()=>startRematch(id,name,weapon)},
+  {label:'Choose another guardian',detail:'Return to the rematch hall',action:openRematchHall}
+ ],openRematchHall);
+}
+
+function startPractice(){
+ const weapon=player.weapon;
+ world=1;level=2;
+ practice={damage:0,chain:0,best:0,rebound:0,timeout:0,phase:0};
+ enterGroundedStage('practice',W,284);
+ Object.assign(player,{weapon,swordCooldown:0,bowCooldown:0,staffCooldown:0,chakramCooldown:0,ultimateCharge:100,dashCooldown:0});
+ for(const key of Object.keys(player.abilityCooldowns))player.abilityCooldowns[key]=0;
+ platforms.push({x:198,y:354,w:146,h:20},{x:665,y:354,w:144,h:20});
+ enemies=[Object.assign(missionGuard(540,'sword',1000,404,644),{practice:true})];
+ updateHud();
+}
+
+function updatePractice(dt){
+ const target=enemies[0];
+ const dealt=target.maxHp-target.hp;
+ practice.phase+=dt;
+ target.x=524+Math.sin(practice.phase*1.8)*112;
+ target.dir=Math.cos(practice.phase*1.8)>0?1:-1;
+ if(dealt>0){
+  practice.damage+=dealt;
+  practice.chain+=dealt;
+  practice.best=Math.max(practice.best,practice.chain);
+  practice.timeout=1.25;
+  target.hp=target.maxHp;
+ }else if(practice.timeout>0){
+  practice.timeout=Math.max(0,practice.timeout-dt);
+  if(practice.timeout===0)practice.chain=0;
+ }
+ target.marked=Math.max(0,(target.marked||0)-dt);
+ target.cosmicBrand=Math.max(0,(target.cosmicBrand||0)-dt);
+ target.impactFlash=Math.max(0,(target.impactFlash||0)-dt);
+ updateHud();
+}
+
+function enterSecret(room){
+ storySecret=room;
+ world=room.region;level=2;
+ enterGroundedStage('secret',W,80);
+ platforms.push(...room.ledges.map(([x,y,w])=>({x,y,w,h:20})));
+ updateHud();
+}
+function uncoverSecret(room){
+ weaponFinishes[room.weapon]=room.finish;
+ saveArcadeData(finishKey,weaponFinishes);
+ storySecret=null;
+ enterStoryTown(true);
+ showStoryScene('Beacon Town',`${room.finish} unlocked`,[['Iven',`That finish suits your ${room.weapon}. I’ve fitted it to the weapon.`]]);
+}
+function canVisitSecret(region){
+ return secretRooms.some(room=>room.region===region&&storyProgress?.rumors?.has(region)&&weaponFinishes[room.weapon]!==room.finish);
+}
+function drawSecretEntrance(){
+ const room=secretRooms.find(secret=>secret.region===world);
+ if(stage==='storyCamp'&&canVisitSecret(world))drawTownGate(room.hatch,false,'Old entrance');
+ if(stage==='secret'&&storySecret){
+  const {x,y,finish}=storySecret;
+  drawPrism(x,y-25,12,19,'#d2f8f2','#51406c');
+  drawHubLabel(x,y-57,finish);
+ }
+}
+
+function beginDownStrike(p){
+ if(p.onGround||p.creatorMode||inWater(p)||p.dashTimer>0||p.swordCooldown>0||p.swing>0||p.downStrike>0||
+    !(keys.ArrowDown||keys.KeyS))return false;
+ p.downStrike=.34;
+ p.swordCooldown=.34;
+ p.swordBuffer=0;
+ p.weaponEquipTimer=0;
+ p.vy=Math.max(300,p.vy);
+ return true;
+}
+function updateDownStrike(p,dt){
+ if(!(p.downStrike>0))return;
+ p.downStrike=Math.max(0,p.downStrike-dt);
+ if(p.onGround||p.weapon!=='sword'||p.dashTimer>0){p.downStrike=0;return}
+ const strike={x:p.x-5,y:p.y+p.h-2,w:p.w+10,h:41};
+ const foe=enemies.find(e=>!e.training&&e.type!=='target'&&e.hp>0&&rect(strike,{x:e.x,y:e.y,w:32,h:42}));
+ const hitsBoss=!foe&&boss?.hp>0&&rect(strike,boss);
+ if(!foe&&!hitsBoss)return;
+ p.vy=-415;
+ p.jumpHold=0;
+ p.jumps=1;
+ p.swordCooldown=Math.min(p.swordCooldown,.14);
+ p.downStrike=0;
+ burst(p.x+p.w/2,p.y+p.h+8,'#adedf4',13);
+ if(foe){
+  foe.hp=Math.max(0,foe.hp-enemyHitDamage(foe,2,foe.x+16,foe.y+5,false,true,true,'plunge'));
+  if(stage==='castle'&&foe.hp<=0)updateCastleProgress();
+ }else if(!boss.armor||p.ultimateSword){
+  boss.hp=Math.max(0,boss.hp-bossHitDamage(boss.x+boss.w/2,boss.y+8,18,true));
+  updateHud();
+  if(boss.hp<=0)advanceBossLevel();
+ }
+}
+
+const endlessRivals=[
+ {weapon:'sword',weak:'dash',tip:'ROLL THROUGH ITS SWING'},
+ {weapon:'bow',weak:'sword',tip:'CLOSE IN WITH THE SWORD'},
+ {weapon:'staff',weak:'bow',tip:'INTERRUPT IT WITH BOW SHOTS'},
+ {weapon:'chakram',weak:'plunge',tip:'STRIKE DOWN FROM ABOVE'}
+];
+function updateRivalChakram(enemy,p,dt){
+ if(enemy.telegraphArmed){
+  if(enemy.windup>0)return;
+  enemy.telegraphArmed=false;
+  const x=enemy.x+16,y=enemy.y+20,dx=enemy.aimX-x,dy=enemy.aimY-y,d=Math.hypot(dx,dy)||1;
+  arrows.push({x,y,vx:dx/d*345,vy:dy/d*345,life:1.68,age:0,type:'shard',rivalDisk:true});
+  enemy.t=2.22;
+  return;
+ }
+ const dx=p.x+p.w/2-enemy.x-16,dy=p.y+p.h/2-enemy.y-20;
+ enemy.dir=Math.sign(dx)||enemy.dir;
+ if(enemy.t<=0&&Math.hypot(dx,dy)<550){
+  enemy.aimX=p.x+p.w/2;enemy.aimY=p.y+p.h/2;
+  enemy.windup=.82;enemy.telegraphArmed=true;
+ }else if(Math.abs(dx)>215){
+  enemy.x=Math.max(enemy.min,Math.min(enemy.max,enemy.x+enemy.dir*104*dt));
+ }
+}
+
 const endlessRecordKey='shardboundEndlessRecord';
 const endlessArenas=[
  {course:1,ledges:[[205,359,152],[603,359,152],[389,302,182]]},
@@ -1770,7 +2064,8 @@ function startEndlessWave(){
  level=layout.course%3+1;
  const formation=run.formationOrder[(run.wave-2+run.formationOrder.length)%run.formationOrder.length];
  const isCaptain=run.wave%5===0;
- run.name=run.wave===1?'Opening Skirmish':isCaptain?'Captain’s Guard':formation[0];
+ run.rival=isCaptain?endlessRivals[(run.wave/5-1)%endlessRivals.length]:null;
+ run.name=run.wave===1?'Opening Skirmish':isCaptain?`${run.rival.weapon} Rival`:formation[0];
  run.seconds=0;
  run.hit=false;
  run.dashBasis=1-run.dashRanks*.10;
@@ -1802,10 +2097,10 @@ function spawnEndlessEnemy(type,x,index){
  const run=endlessRun;
  const captain=type==='captain';
  const hp=2+Math.min(10,Math.floor((run.wave-1)/3))+Math.floor(Math.max(0,run.wave-31)/8);
- const enemy=missionGuard(x,captain?'sword':type,captain?hp*2+4:hp,18,W-50);
+ const enemy=missionGuard(x,captain?run.rival.weapon:type,captain?hp*2+4:hp,18,W-50);
  enemy.t=(type==='bow'||type==='staff'?0.75:.3)+index*.35;
  enemy.dir=x>W/2?-1:1;
- if(captain){enemy.elite=true;enemy.splitDone=true}
+ if(captain){enemy.elite=true;enemy.splitDone=true;enemy.rival=run.rival}
  if(type==='beast')Object.assign(enemy,{kind:'beast',species:currentMode().animal,windup:0,cooldown:1.2,pounce:0,vy:0});
  if(type==='stalker')enemy.cooldown=.7;
  enemies.push(enemy);
@@ -1815,7 +2110,8 @@ function updateEndlessHud(){
  const run=endlessRun,alive=enemies.filter(enemy=>enemy.hp>0).length;
  const progress=`WAVE ${run.wave} · ${run.name.toUpperCase()}`;
  const waiting=run.reinforcementTime>0;
- const detail=waiting?'REINFORCEMENTS INCOMING':
+ const rival=enemies.find(enemy=>enemy.rival&&enemy.hp>0);
+ const detail=waiting?'REINFORCEMENTS INCOMING':rival?rival.rival.tip:
   `${alive} ${alive===1?'ENEMY':'ENEMIES'}${run.reinforcements.length?' · RESERVES WAITING':''} · BEST WAVE ${endlessRecord.wave}`;
  brandEl.textContent='ENDLESS';
  if(scoreEl.textContent!==String(run.score))scoreEl.textContent=run.score;
@@ -1956,10 +2252,10 @@ function enterBossPortal(){if(boss&&boss.worldBoss){
   return;
  }
  if(world>=5){saveProgress();finish('won');return}saveProgress();world++;level=1;score=0;boss=null;arena=null;stage='causeway';player.hp=player.maxHp;player.regenTimer=0;player.x=80;player.y=groundY-player.h;player.vx=0;player.vy=0;player.face=1;player.onGround=false;player.jumps=0;player.doubleJumpTimer=0;player.dropThrough=0;player.dropPlatformY=null;player.lastSafeX=player.x;player.lastSafeY=player.y;player.invuln=1.5;loadCourse(level);updateHud();return}if(stage==='castle'){if(castleGate&&castleGate.active)startFinalBoss();return}if(boss&&boss.finalBoss){finish('won');return}if(level>=3){startCastle();return}nextCourse()}
-function resetJourneyPrompt(){endlessRun=null;endlessRetryDevice=null;endlessStart.textContent='Endless';endlessStart.classList.remove('hidden');tutorialStart.classList.remove('hidden');storyStart.classList.remove('hidden');storyQuit.classList.add('hidden');requestedMode='campaign';gameMode='campaign';tutorial=null;storyProgress=null;storyMission=null;storyAction.classList.add('hidden');window.shardboundDeviceStarting=false;selectedDevice=null;gameEl.dataset.device='pc';gameEl.classList.remove('mobile-mode');overlay.classList.remove('ending');overlay.querySelector('.eyebrow').textContent='The elements awaken';overlay.querySelector('h1').textContent='Shardbound';startBtn.classList.remove('hidden');deviceChoice.classList.add('hidden');deviceChoice.setAttribute('aria-hidden','true');keySummary.classList.remove('hidden');introText.textContent='Oh no! The guardians took the shiny shards. Grab your weapons, bonk the bad guys, and reclaim them across 15 elemental stages!';gameNote.textContent='Find the shiny shards, beat the big bosses, and save the worlds. You can do it!';startBtn.textContent='Begin journey'}
-function showDeviceChoice(){endlessStart.classList.add('hidden');tutorialStart.classList.add('hidden');storyStart.classList.add('hidden');introText.textContent='Choose how you want to play.';keySummary.classList.add('hidden');gameNote.textContent='Choose PC / Laptop or Mobile to start your journey.';startBtn.classList.add('hidden');deviceChoice.classList.remove('hidden');deviceChoice.setAttribute('aria-hidden','false');requestAnimationFrame(()=>{const preferred=window.matchMedia('(max-width: 700px)').matches?mobileStartBtn:pcStartBtn;preferred.focus({preventScroll:true})})}
+function resetJourneyPrompt(){rematch=null;practice=null;storySecret=null;for(const button of arcadeButtons)button.classList.remove('hidden');endlessRun=null;endlessRetryDevice=null;endlessStart.textContent='Endless';endlessStart.classList.remove('hidden');tutorialStart.classList.remove('hidden');storyStart.classList.remove('hidden');storyQuit.classList.add('hidden');requestedMode='campaign';gameMode='campaign';tutorial=null;storyProgress=null;storyMission=null;storyAction.classList.add('hidden');window.shardboundDeviceStarting=false;selectedDevice=null;gameEl.dataset.device='pc';gameEl.classList.remove('mobile-mode');overlay.classList.remove('ending');overlay.querySelector('.eyebrow').textContent='The elements awaken';overlay.querySelector('h1').textContent='Shardbound';startBtn.classList.remove('hidden');deviceChoice.classList.add('hidden');deviceChoice.setAttribute('aria-hidden','true');keySummary.classList.remove('hidden');introText.textContent='Oh no! The guardians took the shiny shards. Grab your weapons, bonk the bad guys, and reclaim them across 15 elemental stages!';gameNote.textContent='Find the shiny shards, beat the big bosses, and save the worlds. You can do it!';startBtn.textContent='Begin journey'}
+function showDeviceChoice(){for(const button of arcadeButtons)button.classList.add('hidden');endlessStart.classList.add('hidden');tutorialStart.classList.add('hidden');storyStart.classList.add('hidden');introText.textContent='Choose how you want to play.';keySummary.classList.add('hidden');gameNote.textContent='Choose PC / Laptop or Mobile to start your journey.';startBtn.classList.add('hidden');deviceChoice.classList.remove('hidden');deviceChoice.setAttribute('aria-hidden','false');requestAnimationFrame(()=>{const preferred=window.matchMedia('(max-width: 700px)').matches?mobileStartBtn:pcStartBtn;preferred.focus({preventScroll:true})})}
 function beginJourney(e){if(e)e.preventDefault();if(gameState==='paused'){startGame();return}if(gameState==='playing')return;if(gameState!=='title')resetJourneyPrompt();showDeviceChoice()}
-function chooseDevice(device){selectedDevice=device;gameEl.dataset.device=device;gameEl.classList.toggle('mobile-mode',device==='mobile');try{gameMode=requestedMode;requestedMode='campaign';reset();if(gameMode==='tutorial')startTutorial();else if(gameMode==='story')startStory();else if(gameMode==='endless')startEndlessRun();keys={};gameState='playing';overlay.classList.add('hidden');syncCursor();last=performance.now();if(!loopStarted){loopStarted=true;requestAnimationFrame(loop)}canvas.focus({preventScroll:true});gameNote.textContent=''}catch(error){window.shardboundDeviceStarting=false;console.error('Shardbound device start failed:',error);gameState='title';overlay.classList.remove('hidden');startBtn.classList.add('hidden');deviceChoice.classList.remove('hidden');deviceChoice.setAttribute('aria-hidden','false');gameNote.textContent='Could not start the game: '+(error&&error.message?error.message:'unknown startup error')}}
+function chooseDevice(device){selectedDevice=device;gameEl.dataset.device=device;gameEl.classList.toggle('mobile-mode',device==='mobile');try{gameMode=requestedMode;requestedMode='campaign';reset();if(gameMode==='tutorial')startTutorial();else if(gameMode==='story')startStory();else if(gameMode==='endless')startEndlessRun();else if(gameMode==='practice')startPractice();keys={};gameState='playing';overlay.classList.add('hidden');syncCursor();last=performance.now();if(!loopStarted){loopStarted=true;requestAnimationFrame(loop)}canvas.focus({preventScroll:true});gameNote.textContent='';if(gameMode==='rematch')openRematchHall()}catch(error){window.shardboundDeviceStarting=false;console.error('Shardbound device start failed:',error);gameState='title';overlay.classList.remove('hidden');startBtn.classList.add('hidden');deviceChoice.classList.remove('hidden');deviceChoice.setAttribute('aria-hidden','false');gameNote.textContent='Could not start the game: '+(error&&error.message?error.message:'unknown startup error')}}
 window.shardboundChooseDevice=device=>chooseDevice(device);window.shardboundResumeJourney=resumeGame;window.shardboundIsPaused=()=>gameState==='paused';
 function awardDashCounter(){
  if(stage==='tutorial'||inStoryHub()||player.creatorMode||player.dashCounterEarned)return;
@@ -2037,6 +2333,7 @@ function tryDash(){
  p.dashHits=new Set();
  p.dashTrail={x:p.x+p.w/2,y:p.y+p.h/2,dir,groundRoll,distance,feetY:p.y+p.h,time:.38,max:.38};
  p.swing=0;
+ p.downStrike=0;
  p.swordBuffer=0;
  p.attackAnim=null;
  p.airDash=!groundRoll&&!inWater(p)&&!p.creatorMode;
@@ -2055,7 +2352,7 @@ function strikeAlongDash(p,startX){
  for(const e of enemies){
   if(e.hp<=0||e.type==='target'||p.dashHits.has(e)||!rect(swept,{x:e.x,y:e.y,w:32,h:42}))continue;
   p.dashHits.add(e);
-  const cut=enemyHitDamage(e,2,e.x+16,e.y+20);
+  const cut=enemyHitDamage(e,2,e.x+16,e.y+20,false,false,false,'dash');
   e.hp=Math.max(0,e.hp-cut);
   applyEssenceEffects(e,p.dashDir);
   burst(e.x+16,e.y+20,'#daf8ff',8);
@@ -2112,9 +2409,11 @@ function inWater(p=player){return stage==='causeway'&&waterZones.some(z=>p.x+p.w
 
 function shardBurst(){const p=player;if(gameState!=='playing'||p.ultimateCharge<100)return;p.ultimateCharge=0;const cx=p.x+p.w/2,cy=p.y+p.h/2;p.burstArt={x:cx,y:cy,time:.52,max:.52};for(let i=0;i<24;i++){const a=i*Math.PI*2/24;shots.push({x:cx,y:cy,vx:Math.cos(a)*460,vy:Math.sin(a)*460,life:1.2,type:'shard',damage:3,void:true,burst:true})}burst(cx,cy,'#b9f8ff',28);updateWeaponHud()}
 function selectWeapon(weapon){
+ if(rematch?.weapon&&weapon!==rematch.weapon)return;
  const p=player,previous=p.weapon;
  if(weapon===previous)return;
  p.weapon=weapon;
+ p.downStrike=0;
  p.swordBuffer=0;
  p.swing=0;
  p.weaponSwapTimer=.25;
@@ -2169,6 +2468,7 @@ function startSwordSwing(p){
 function attack(){
  if(gameState!=='playing'||inStoryHub())return;
  if(player.weapon==='sword'){
+  if(beginDownStrike(player)||player.downStrike>0)return;
   if(player.swordCooldown<=0&&player.swing<=0&&player.dashTimer<=0)startSwordSwing(player);
   else player.swordBuffer=Math.max(.24,player.dashTimer+.12);
   return;
@@ -2221,6 +2521,7 @@ function hitReturningChakram(shot,hitbox){
   if(dealt<=0)continue;
   enemy.hp=Math.max(0,enemy.hp-dealt);
   shot.scoredReturn=true;
+  if(enemy.practice&&practice)practice.rebound++;
   if(crosscut){
    enemy.marked=0;
    enemy.rooted=Math.max(enemy.rooted||0,.55);
@@ -2296,8 +2597,8 @@ window.addEventListener('keydown',e=>{if(storySaveMenuBack){
  if(e.code==='Escape'){e.preventDefault();if(storyDialogue)closeStoryScene();else resumeStoryPlay()}
  return;
  }if((e.target===storyQuit||e.target===storyAction)&&(e.code==='Enter'||e.code==='Space'))return;
- if(e.code==='KeyF'&&!e.repeat&&gameState==='playing'&&(inStoryHub()||stage==='storyMission')){e.preventDefault();interactStoryHub();return}
- if(e.code==='Escape'){e.preventDefault();if(e.repeat)return;if(gameState==='playing')pauseGame();else if(gameState==='paused')resumeGame();return}const onStartControl=e.target instanceof Element&&e.target.closest('#start,#pcStart,#mobileStart,#tutorialStart,#storyStart,#endlessStart');if((e.target===tutorialDismiss||e.target===tutorialSkip)&&(e.code==='Enter'||e.code==='Space'))return;if(['KeyW','KeyA','KeyS','KeyD','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code)&&!(e.code==='Space'&&onStartControl))e.preventDefault();keys[e.code]=true;if((gameState==='title'||gameState==='won'||gameState==='lost')&&(e.code==='Enter'||e.code==='Space')&&!onStartControl){e.preventDefault();beginJourney();return}if(!e.repeat&&(e.code==='KeyW'||e.code==='ArrowUp'||e.code==='Space'))tryJump();if(!e.repeat&&e.code==='KeyG'&&gameMode!=='endless'){player.creatorMode=!player.creatorMode;player.vx=0;player.vy=0;updateHud()}if(!e.repeat&&e.code==='Digit1')selectWeapon('sword');if(!e.repeat&&e.code==='Digit2')selectWeapon('bow');if(!e.repeat&&e.code==='Digit3')selectWeapon('staff');if(!e.repeat&&e.code==='Digit4')selectWeapon('chakram');if((e.code==='KeyS'||e.code==='ArrowDown')&&!e.repeat&&!inWater())tryDrop();if(e.code==='KeyE'&&!e.repeat)specialAbility();if(e.code==='KeyQ'&&!e.repeat)tryDash();if(e.code==='KeyR'&&!e.repeat)shardBurst()});
+ if(e.code==='KeyF'&&!e.repeat&&gameState==='playing'&&(inStoryHub()||['storyMission','practice','secret'].includes(stage))){e.preventDefault();interactStoryHub();return}
+ if(e.code==='Escape'){e.preventDefault();if(e.repeat)return;if(gameState==='playing')pauseGame();else if(gameState==='paused')resumeGame();return}const onStartControl=e.target instanceof Element&&e.target.closest('#start,#pcStart,#mobileStart,#tutorialStart,#storyStart,#endlessStart,#rematchStart,#practiceStart');if((e.target===tutorialDismiss||e.target===tutorialSkip)&&(e.code==='Enter'||e.code==='Space'))return;if(['KeyW','KeyA','KeyS','KeyD','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code)&&!(e.code==='Space'&&onStartControl))e.preventDefault();keys[e.code]=true;if((gameState==='title'||gameState==='won'||gameState==='lost')&&(e.code==='Enter'||e.code==='Space')&&!onStartControl){e.preventDefault();beginJourney();return}if(!e.repeat&&(e.code==='KeyW'||e.code==='ArrowUp'||e.code==='Space'))tryJump();if(!e.repeat&&e.code==='KeyG'&&!['endless','rematch','practice'].includes(gameMode)&&stage!=='secret'){player.creatorMode=!player.creatorMode;player.vx=0;player.vy=0;updateHud()}if(!e.repeat&&e.code==='Digit1')selectWeapon('sword');if(!e.repeat&&e.code==='Digit2')selectWeapon('bow');if(!e.repeat&&e.code==='Digit3')selectWeapon('staff');if(!e.repeat&&e.code==='Digit4')selectWeapon('chakram');if((e.code==='KeyS'||e.code==='ArrowDown')&&!e.repeat&&!inWater())tryDrop();if(e.code==='KeyE'&&!e.repeat)specialAbility();if(e.code==='KeyQ'&&!e.repeat)tryDash();if(e.code==='KeyR'&&!e.repeat)shardBurst()});
 window.addEventListener('keyup',e=>{
  keys[e.code]=false;
  if(e.code==='KeyW'||e.code==='ArrowUp'||e.code==='Space')releaseJump();
@@ -2322,7 +2623,7 @@ document.querySelectorAll('.touch button').forEach(button=>{
   if(action==='attack'){mouse.active=false;attack();return}
   if(action==='special'){specialAbility();return}
   if(action==='dash'){tryDash();return}
-  if(action==='drop'&&!inWater()){tryDrop();return}
+  if(action==='drop'&&!inWater()&&player.onGround){tryDrop();return}
   if(action==='burst'){shardBurst();return}
   if(!key)return;
   button.setPointerCapture?.(event.pointerId);
@@ -2416,7 +2717,11 @@ function updateRangedGuard(e,p,dt){
   const dx=e.aimX-sx,dy=e.aimY-sy,len=Math.hypot(dx,dy)||1;
   const baseSpeed=staff?Math.min(370,330+(difficultyRank()-1)*3):Math.min(420,370+(difficultyRank()-1)*4);
   const speed=baseSpeed*(stage==='tutorial'?.72:.84);
-  arrows.push({x:sx,y:sy,vx:dx/len*speed,vy:dy/len*speed,life:3,type:staff?'shard':'arrow',decoyTarget:e.aimDecoy});
+  const angle=Math.atan2(dy,dx),offsets=staff&&e.rival?[-.18,0,.18]:[0];
+  for(const offset of offsets){
+   const aim=angle+offset;
+   arrows.push({x:sx,y:sy,vx:Math.cos(aim)*speed,vy:Math.sin(aim)*speed,life:3,type:staff?'shard':'arrow',decoyTarget:e.aimDecoy});
+  }
   e.aimDecoy=null;
   e.t=stage==='castle'?3.4+Math.random()*.6:Math.max(1.95,3.15-(difficultyRank()-1)*.08)+Math.random()*.35;
   return;
@@ -2458,7 +2763,15 @@ function drawEnemyTelegraph(e){
  ctx.restore();
 }
 
-function enemyHitDamage(target,base,x,y,trainingTargetHit=false,canCounter=false,guardBreak=false){if(target.type==='target'&&!trainingTargetHit)return 0;const critical=Math.random()<.3;if(!guardBreak&&!critical&&target.armored&&Math.random()<.1){burst(x,y,'#b9d3de',7);particles.push({x,y,vx:0,vy:-35,life:.65,max:.65,color:'#d7eaf0',size:12,text:'BLOCKED'});return 0}target.impactFlash=.11;
+function enemyHitDamage(target,base,x,y,trainingTargetHit=false,canCounter=false,guardBreak=false,style=null){if(target.type==='target'&&!trainingTargetHit)return 0;const critical=Math.random()<.3;if(!guardBreak&&!critical&&target.armored&&Math.random()<.1){burst(x,y,'#b9d3de',7);particles.push({x,y,vx:0,vy:-35,life:.65,max:.65,color:'#d7eaf0',size:12,text:'BLOCKED'});return 0}target.impactFlash=.11;
+ if(target.rival&&style===target.rival.weak){
+  base*=1.75;
+  if(target.rival.weapon==='staff'&&target.telegraphArmed){
+   target.telegraphArmed=false;
+   target.windup=0;
+   target.t=Math.max(target.t,.55);
+  }
+ }
  base=counterDamage(base,canCounter&&target.type!=='target',x,y);if(critical){burst(x,y,'#fff06a',12);particles.push({x,y,vx:0,vy:-48,life:.8,max:.8,color:'#fff06a',size:12,text:'CRIT! ×2'});popupDamage(x,y,base*2,'#fff06a');return base*2}popupDamage(x,y,base);return base}
 function bossHitDamage(x,y,base=15,canCounter=false){
  const exposed=gameMode==='campaign'&&boss?.worldBoss&&boss.exposed>0&&!boss.cue;
@@ -2513,18 +2826,20 @@ function damage(showEffect=true,sourceX=null){
   if(showEffect&&player.dashDodgeTimer>0)awardDashCounter();
   return;
  }
+ if(rematch)rematch.hit=true;
  if(gameMode==='endless')endlessRun.hit=true;
  player.counterTimer=0;
  player.swordBuffer=0;
  player.swordComboTimer=0;
- player.swing=0;player.hitFlash=.24;player.hp=Math.max(stage==='tutorial'?1:0,player.hp-1);player.regenTimer=0;player.invuln=1.15;const away=sourceX===null?-player.face:(sourceX<player.x+player.w/2?1:-1);player.vx=away*190;player.vy=-230;if(showEffect){shake=9;burst(player.x+15,player.y+22,'#ff8c83',10)}updateHud();if(player.hp<=0){
+ player.swing=0;player.downStrike=0;player.hitFlash=.24;player.hp=Math.max(stage==='tutorial'?1:0,player.hp-1);player.regenTimer=0;player.invuln=1.15;const away=sourceX===null?-player.face:(sourceX<player.x+player.w/2?1:-1);player.vx=away*190;player.vy=-230;if(showEffect){shake=9;burst(player.x+15,player.y+22,'#ff8c83',10)}updateHud();if(player.hp<=0){
  if(gameMode==='story'){
   player.hp=player.maxHp;
   enterStoryTown(true);
   showStoryScene('Beacon Town','Back at the waygate',[
    ['Mara','You made it back. The missions you completed still count. Try another way when you’re ready.']
   ]);
- }else if(gameMode==='endless')finishEndlessRun();
+ }else if(rematch)finishRematch(false);
+ else if(gameMode==='endless')finishEndlessRun();
  else finish('lost');
  }}
 function finish(state){const story=gameMode==='story',stats=story?storyStats:saveStats;victorySequence=null;gameState=state;syncCursor();overlay.classList.remove('hidden');resetJourneyPrompt();overlay.classList.add('ending');overlay.querySelector('.eyebrow').textContent=state==='won'?'Journey complete':'Run ended';overlay.querySelector('h1').textContent=state==='won'?'Shardbound is saved!':'The knight has fallen';introText.textContent=story&&state==='won'?'You restored all five beacon channels and brought the light back to Beacon Town.':state==='won'?`You cleared all 15 elemental stages, defeated the final guardian, and recovered ${totalScore} shards. The realms can shine again!`:`You recovered ${totalScore} shards before your health ran out. Catch your breath and try the journey again.`;keySummary.classList.add('hidden');deviceChoice.classList.add('hidden');deviceChoice.setAttribute('aria-hidden','true');startBtn.classList.remove('hidden');startBtn.textContent=story?'Begin journey':state==='won'?'Play again':'Try again';gameNote.textContent=story?'':`Best shards: ${stats.bestShards||0} · lifetime shards: ${stats.lifetimeShards||0}`}
@@ -2812,7 +3127,7 @@ function landOnPlatform(player,previousY){
  player.lastSafeY=player.y;
 }
 
-function update(dt){if(gameState!=='playing')return;dt=Math.min(dt,.033);if(victorySequence){victorySequence.time+=dt;if(victorySequence.time>=4)finish('won');return}let p=player;updateMovingPlatforms(dt);updateAstralUnderflow(p,dt);decoys.forEach(d=>d.life-=dt);decoys=decoys.filter(d=>d.life>0);groundScars.forEach(s=>s.life-=dt);groundScars=groundScars.filter(s=>s.life>0);p.invuln=Math.max(0,p.invuln-dt);p.hitFlash=Math.max(0,(p.hitFlash||0)-dt);p.weaponSwapTimer=Math.max(0,(p.weaponSwapTimer||0)-dt);if(p.attackAnim){p.attackAnim.time=Math.max(0,p.attackAnim.time-dt);if(p.attackAnim.time<=0)p.attackAnim=null}p.landTimer=Math.max(0,(p.landTimer||0)-dt);p.weaponEquipTimer=Math.max(0,(p.weaponEquipTimer||0)-dt);p.swing=Math.max(0,p.swing-dt);if(p.vortex){p.vortex.life-=dt;if(p.vortex.life<=0)p.vortex=null}if(p.burstArt){p.burstArt.time-=dt;if(p.burstArt.time<=0)p.burstArt=null}const attackStep=dt*(stage==='endless'?endlessRun.attackRate:1);
+function update(dt){if(gameState!=='playing')return;dt=Math.min(dt,.033);if(rematch)rematch.seconds+=dt;if(victorySequence){victorySequence.time+=dt;if(victorySequence.time>=4)finish('won');return}let p=player;updateMovingPlatforms(dt);updateAstralUnderflow(p,dt);if(gameState!=='playing')return;decoys.forEach(d=>d.life-=dt);decoys=decoys.filter(d=>d.life>0);groundScars.forEach(s=>s.life-=dt);groundScars=groundScars.filter(s=>s.life>0);p.invuln=Math.max(0,p.invuln-dt);p.hitFlash=Math.max(0,(p.hitFlash||0)-dt);p.weaponSwapTimer=Math.max(0,(p.weaponSwapTimer||0)-dt);if(p.attackAnim){p.attackAnim.time=Math.max(0,p.attackAnim.time-dt);if(p.attackAnim.time<=0)p.attackAnim=null}p.landTimer=Math.max(0,(p.landTimer||0)-dt);p.weaponEquipTimer=Math.max(0,(p.weaponEquipTimer||0)-dt);p.swing=Math.max(0,p.swing-dt);if(p.vortex){p.vortex.life-=dt;if(p.vortex.life<=0)p.vortex=null}if(p.burstArt){p.burstArt.time-=dt;if(p.burstArt.time<=0)p.burstArt=null}const attackStep=dt*(stage==='endless'?endlessRun.attackRate:1);
  p.swordCooldown=Math.max(0,p.swordCooldown-attackStep);
  p.chakramCooldown=Math.max(0,(p.chakramCooldown||0)-attackStep);
  p.bowCooldown=Math.max(0,p.bowCooldown-attackStep);
@@ -2868,10 +3183,12 @@ function update(dt){if(gameState!=='playing')return;dt=Math.min(dt,.033);if(vict
   enterBossPortal();
   if(gameState==='story'||inStoryHub())return;
  }
- const swingProgress=p.swingDuration?1-p.swing/p.swingDuration:0;if(p.weapon==='sword'&&p.onGround&&p.swing>0&&p.swingDamageMultiplier>1&&!p.bigImpactDone&&swingProgress>=.82){p.bigImpactDone=true;const impactX=p.x+p.w/2+p.swingFace*48,surface=platforms.filter(pl=>impactX>=pl.x&&impactX<=pl.x+pl.w&&pl.y>=p.y+p.h-8).sort((a,b)=>a.y-b.y)[0];if(surface)groundScars.push({x:impactX,y:surface.y,life:5,maxLife:5});for(const b of barricades){if(!b.alive||Math.abs((b.x+b.w/2)-impactX)>58)continue;b.hp--;burst(b.x+b.w/2,b.y+24,'#e6c58f',10);if(b.hp<=0){b.alive=false;burst(b.x+b.w/2,b.y+24,'#ffe1a0',18)}}}if(p.weapon==='sword'&&p.swing>0&&swingProgress>=.22&&swingProgress<=.76){enemies.forEach(e=>{if(e.hp>0&&e.type!=='target'&&!p.swingHits.has(e)&&meleeWeaponHitsRect(p,{x:e.x,y:e.y,w:32,h:42})){p.swingHits.add(e);let hitDamage=enemyHitDamage(e,(player.ultimateSword?3:1)*(p.swingDamageMultiplier||1)+essenceDamage(e),e.x+15,e.y+18,false,true,p.swingDamageMultiplier>1);if(hitDamage>0&&e.marked>0){e.marked=0;hitDamage*=3;burst(e.x+16,e.y+18,'#8bf3ff',15);for(const nearby of enemies){if(nearby===e||nearby.hp<=0||Math.hypot(nearby.x-e.x,nearby.y-e.y)>82)continue;nearby.hp=Math.max(0,nearby.hp-enemyHitDamage(nearby,Math.max(1,hitDamage*.5),nearby.x+16,nearby.y+20));burst(nearby.x+16,nearby.y+20,'#8bf3ff',5)}particles.push({x:e.x+16,y:e.y+8,vx:0,vy:-48,life:.7,max:.7,color:'#9bf7ff',size:12,text:'KINETIC DETONATION'})}e.hp=Math.max(0,e.hp-hitDamage);if(hitDamage>0&&p.swingDamageMultiplier>1){interruptEnemy(e,Math.sign(e.x-p.x)||p.swingFace);shake=Math.max(shake,3.2)}applyEssenceEffects(e,p.swingFace);if(e.cosmicBrand>0)detonateCosmicBrand(e);if(stage==='castle'&&e.hp<=0)updateCastleProgress();burst(e.x+15,e.y+18,player.ultimateSword?'#c99cff':'#ffd477',player.ultimateSword?14:7)}});if(boss&&boss.hp>0&&!p.swingHits.has(boss)&&meleeWeaponHitsRect(p,{x:boss.x,y:boss.y+12,w:boss.w,h:boss.h-20})){p.swingHits.add(boss);if(!boss.armor||player.ultimateSword){boss.hp=Math.max(0,boss.hp-bossHitDamage(boss.x+(p.swingFace>0?0:boss.w),boss.y+58,15*(p.swingDamageMultiplier||1),true));applyEssenceEffects(boss,p.swingFace);burst(boss.x+(p.swingFace>0?0:boss.w),boss.y+58,player.ultimateSword?'#c99cff':'#ffd477',player.ultimateSword?14:9);updateHud();if(boss.hp<=0)advanceBossLevel()}else burst(boss.x+boss.w/2,boss.y+58,'#aebfce',6)}}
+ updateDownStrike(p,dt);
+ if(gameState!=='playing')return;
+ const swingProgress=p.swingDuration?1-p.swing/p.swingDuration:0;if(p.weapon==='sword'&&p.onGround&&p.swing>0&&p.swingDamageMultiplier>1&&!p.bigImpactDone&&swingProgress>=.82){p.bigImpactDone=true;const impactX=p.x+p.w/2+p.swingFace*48,surface=platforms.filter(pl=>impactX>=pl.x&&impactX<=pl.x+pl.w&&pl.y>=p.y+p.h-8).sort((a,b)=>a.y-b.y)[0];if(surface)groundScars.push({x:impactX,y:surface.y,life:5,maxLife:5});for(const b of barricades){if(!b.alive||Math.abs((b.x+b.w/2)-impactX)>58)continue;b.hp--;burst(b.x+b.w/2,b.y+24,'#e6c58f',10);if(b.hp<=0){b.alive=false;burst(b.x+b.w/2,b.y+24,'#ffe1a0',18)}}}if(p.weapon==='sword'&&p.swing>0&&swingProgress>=.22&&swingProgress<=.76){enemies.forEach(e=>{if(e.hp>0&&e.type!=='target'&&!p.swingHits.has(e)&&meleeWeaponHitsRect(p,{x:e.x,y:e.y,w:32,h:42})){p.swingHits.add(e);let hitDamage=enemyHitDamage(e,(player.ultimateSword?3:1)*(p.swingDamageMultiplier||1)+essenceDamage(e),e.x+15,e.y+18,false,true,p.swingDamageMultiplier>1,'sword');if(hitDamage>0&&e.marked>0){e.marked=0;hitDamage*=3;burst(e.x+16,e.y+18,'#8bf3ff',15);for(const nearby of enemies){if(nearby===e||nearby.hp<=0||Math.hypot(nearby.x-e.x,nearby.y-e.y)>82)continue;nearby.hp=Math.max(0,nearby.hp-enemyHitDamage(nearby,Math.max(1,hitDamage*.5),nearby.x+16,nearby.y+20));burst(nearby.x+16,nearby.y+20,'#8bf3ff',5)}particles.push({x:e.x+16,y:e.y+8,vx:0,vy:-48,life:.7,max:.7,color:'#9bf7ff',size:12,text:'KINETIC DETONATION'})}e.hp=Math.max(0,e.hp-hitDamage);if(hitDamage>0&&p.swingDamageMultiplier>1){interruptEnemy(e,Math.sign(e.x-p.x)||p.swingFace);shake=Math.max(shake,3.2)}applyEssenceEffects(e,p.swingFace);if(e.cosmicBrand>0)detonateCosmicBrand(e);if(stage==='castle'&&e.hp<=0)updateCastleProgress();burst(e.x+15,e.y+18,player.ultimateSword?'#c99cff':'#ffd477',player.ultimateSword?14:7)}});if(boss&&boss.hp>0&&!p.swingHits.has(boss)&&meleeWeaponHitsRect(p,{x:boss.x,y:boss.y+12,w:boss.w,h:boss.h-20})){p.swingHits.add(boss);if(!boss.armor||player.ultimateSword){boss.hp=Math.max(0,boss.hp-bossHitDamage(boss.x+(p.swingFace>0?0:boss.w),boss.y+58,15*(p.swingDamageMultiplier||1),true));applyEssenceEffects(boss,p.swingFace);burst(boss.x+(p.swingFace>0?0:boss.w),boss.y+58,player.ultimateSword?'#c99cff':'#ffd477',player.ultimateSword?14:9);updateHud();if(boss.hp<=0)advanceBossLevel()}else burst(boss.x+boss.w/2,boss.y+58,'#aebfce',6)}}
  for(const s of shards){if(!s.got&&Math.abs((p.x+p.w/2)-s.x)<25&&Math.abs((p.y+p.h/2)-(s.y+Math.sin(performance.now()/260+s.phase)*7.5))<30){s.got=true;pickupEffects.push({x:s.x,y:s.y,time:0,max:.42,color:level===2?'#a9f27f':(elementColors[currentMode().element]||'#b5fff3')});if(pickupEffects.length>12)pickupEffects.shift();score++;if(stage!=='tutorial'){totalScore++;saveProgress(true)}player.ultimateCharge=Math.min(100,(player.ultimateCharge||0)+10);if(level===2)player.hp=Math.min(player.maxHp,player.hp+1);burst(s.x,s.y,level===2?'#a9f27f':'#b5fff3',6);updateHud()}}
  enemies.forEach(e=>{
-   if(e.hp<=0||e.type==='target')return;if(e.elite&&e.type!=='staff'){const floor=platforms.filter(pl=>!pl.falling&&e.x+16>pl.x&&e.x+16<pl.x+pl.w&&pl.y>=e.y+42).reduce((best,pl)=>Math.min(best,pl.y),groundY);e.y=floor-42}e.marked=Math.max(0,(e.marked||0)-dt);e.cosmicBrand=Math.max(0,(e.cosmicBrand||0)-dt);e.rooted=Math.max(0,(e.rooted||0)-dt);
+   if(e.hp<=0||e.type==='target'||e.practice)return;if(e.elite&&e.type!=='staff'){const floor=platforms.filter(pl=>!pl.falling&&e.x+16>pl.x&&e.x+16<pl.x+pl.w&&pl.y>=e.y+42).reduce((best,pl)=>Math.min(best,pl.y),groundY);e.y=floor-42}e.marked=Math.max(0,(e.marked||0)-dt);e.cosmicBrand=Math.max(0,(e.cosmicBrand||0)-dt);e.rooted=Math.max(0,(e.rooted||0)-dt);
    e.impactFlash=Math.max(0,(e.impactFlash||0)-dt);
    if(updateEnemyStagger(e,dt))return;
    e.t-=dt;if(e.kind!=='beast')e.windup=Math.max(0,(e.windup||0)-dt);e.swing=Math.max(0,(e.swing||0)-dt);if(e.relayAttacker){
@@ -2879,16 +3196,20 @@ function update(dt){if(gameState!=='playing')return;dt=Math.min(dt,.033);if(vict
     return;
    }if(e.rooted>0){if(rect({x:e.x,y:e.y,w:32,h:42},{x:p.x,y:p.y,w:p.w,h:p.h}))damage(true,e.x+16);return}
    if(e.kind==='beast'){const dx=p.x+p.w/2-(e.x+16),distance=Math.abs(dx),underPlatform=enemyBelowPlayerPlatform(e,p);if(!underPlatform&&distance>14)e.dir=dx<0?-1:1;e.cooldown=Math.max(0,e.cooldown-dt);if(e.windup>0){e.windup-=dt;if(e.windup<=0){e.pounce=.45;e.pounceDir=e.dir;e.vy=isScorpionSpecies(e.species)?-90:-270}}if(e.pounce>0||e.y<groundY-42){e.pounce=Math.max(0,e.pounce-dt);const nx=Math.max(e.min,Math.min(e.max,e.x+e.pounceDir*(isScorpionSpecies(e.species)?185:255)*dt));e.x=nx;e.y+=e.vy*dt;e.vy+=850*dt;if(e.y>=groundY-42){e.y=groundY-42;e.vy=0;e.pounce=0}}else{const nx=e.x+e.dir*(distance<360?72:24)*dt;if(nx>=e.min&&nx<=e.max&&enemyHasFloor(e,nx))e.x=nx;if(e.cooldown<=0&&distance<(isScorpionSpecies(e.species)?115:155)&&Math.abs(p.y-e.y)<78){e.windup=.34;e.cooldown=isScorpionSpecies(e.species)?2.6:2.1}}if(rect({x:e.x,y:e.y,w:32,h:42},{x:p.x,y:p.y,w:p.w,h:p.h})){const enemyInFront=p.face>0?e.x+16>p.x+p.w/2:e.x+16<p.x+p.w/2;if(p.block>0&&enemyInFront)burst(e.x+16,e.y+20,'#d5edf1',6);else damage(true,e.x+16)}return}
-  if(e.type==='stalker'){const dx=p.x+p.w/2-(e.x+16),distance=Math.abs(dx),behind=p.face>0?dx<0:dx>0;e.cooldown=Math.max(0,e.cooldown-dt);if(behind&&distance<260){e.dir=dx<0?-1:1;e.x=Math.max(e.min,Math.min(e.max,e.x+e.dir*(e.clone?(distance<115?330:150):(distance<115?265:92))*dt));if(distance<44&&e.cooldown<=0){damage(true,e.x+16);e.cooldown=1.7;burst(e.x+16,e.y+20,'#a78bfa',9)}}else{e.x+=e.dir*26*dt;if(e.x<e.min||e.x>e.max)e.dir*=-1}}else if(e.type==='sword')updateSwordGuard(e,p,dt);
+  if(e.type==='stalker'){const dx=p.x+p.w/2-(e.x+16),distance=Math.abs(dx),behind=p.face>0?dx<0:dx>0;e.cooldown=Math.max(0,e.cooldown-dt);if(behind&&distance<260){e.dir=dx<0?-1:1;e.x=Math.max(e.min,Math.min(e.max,e.x+e.dir*(e.clone?(distance<115?330:150):(distance<115?265:92))*dt));if(distance<44&&e.cooldown<=0){damage(true,e.x+16);e.cooldown=1.7;burst(e.x+16,e.y+20,'#a78bfa',9)}}else{e.x+=e.dir*26*dt;if(e.x<e.min||e.x>e.max)e.dir*=-1}}else if(e.rival?.weapon==='chakram')updateRivalChakram(e,p,dt);
+  else if(e.type==='sword')updateSwordGuard(e,p,dt);
   else updateRangedGuard(e,p,dt);
  });
  updateCourseEffects(p,dt);
  updateBossFight(p,dt);
  bossHazards=bossHazards.filter(h=>h.life>0);for(const h of bossHazards){if(h.activeDelay>0){h.activeDelay=Math.max(0,h.activeDelay-dt);continue}if(h.type==='stomp'){h.x+=h.vx*dt;if(h.x+h.w<((arena&&arena.left)||0)||h.x>((arena&&arena.right)||worldW))h.life=0}else if(h.type==='icicle'){h.y+=h.vy*dt;if(h.y>=groundY){h.life=0;burst(h.x+h.w/2,groundY-3,h.element==='crystal'?'#e9a9ef':'#c8f3ff',5)}}h.life-=dt;const contact=h.type==='vine'?p.onGround&&rect(h,{x:p.x,y:p.y,w:p.w,h:p.h}):(h.type==='beam'||h.type==='claw'||h.type==='stomp'||h.type==='icicle')&&rect(h,{x:p.x,y:p.y,w:p.w,h:p.h});if(contact&&!h.hit){h.hit=true;if(h.type==='stomp'||h.type==='icicle')h.life=0;damage(true,h.x+h.w/2)}}
- arrows=arrows.filter(a=>a.life>0&&a.x>-20&&a.x<worldW+20&&a.y>-100&&a.y<H+100);for(const a of arrows){if(Math.hypot(a.vx,a.vy)>220){a.trail=a.trail||[];a.trail.push({x:a.x,y:a.y});if(a.trail.length>5)a.trail.shift()}a.x+=a.vx*dt;a.y+=a.vy*dt;a.life-=dt;if(rect(a.type==='shard'?{x:a.x-8,y:a.y-8,w:16,h:16}:{x:a.x-10,y:a.y-3,w:20,h:6},{x:p.x,y:p.y,w:p.w,h:p.h})){a.life=0;let comingFromFront=p.face>0?a.x>p.x+p.w/2:a.x<p.x+p.w/2;if(p.block>0&&comingFromFront)burst(a.x,a.y,'#d8f6e9',5);else damage(true,a.x)}else if(a.decoyTarget&&a.decoyTarget.life>0&&rect({x:a.x-10,y:a.y-4,w:20,h:8},{x:a.decoyTarget.x,y:a.decoyTarget.y,w:30,h:48})){a.life=0;a.decoyTarget.life=0;burst(a.x,a.y,'#9cefff',7);continue}}
+ arrows=arrows.filter(a=>a.life>0&&a.x>-20&&a.x<worldW+20&&a.y>-100&&a.y<H+100);for(const a of arrows){if(Math.hypot(a.vx,a.vy)>220){a.trail=a.trail||[];a.trail.push({x:a.x,y:a.y});if(a.trail.length>5)a.trail.shift()}if(a.rivalDisk){
+  a.age+=dt;
+  if(a.age>.60&&!a.curled){a.curled=true;a.vx*=-1;a.vy*=-1}
+ }a.x+=a.vx*dt;a.y+=a.vy*dt;a.life-=dt;if(rect(a.type==='shard'?{x:a.x-8,y:a.y-8,w:16,h:16}:{x:a.x-10,y:a.y-3,w:20,h:6},{x:p.x,y:p.y,w:p.w,h:p.h})){a.life=0;let comingFromFront=p.face>0?a.x>p.x+p.w/2:a.x<p.x+p.w/2;if(p.block>0&&comingFromFront)burst(a.x,a.y,'#d8f6e9',5);else damage(true,a.x)}else if(a.decoyTarget&&a.decoyTarget.life>0&&rect({x:a.x-10,y:a.y-4,w:20,h:8},{x:a.decoyTarget.x,y:a.decoyTarget.y,w:30,h:48})){a.life=0;a.decoyTarget.life=0;burst(a.x,a.y,'#9cefff',7);continue}}
  shots=shots.filter(a=>a.life>0);for(const a of shots){if(a.type==='chakram'){steerChakram(a,p,dt);if(a.life<=0)continue}if(a.homing){let target=enemies.filter(e=>e.hp>0).sort((u,v)=>Math.hypot(u.x+16-a.x,u.y+21-a.y)-Math.hypot(v.x+16-a.x,v.y+21-a.y))[0];if(boss&&boss.hp>0&&(!target||Math.hypot(boss.x+boss.w/2-a.x,boss.y+boss.h/2-a.y)<Math.hypot(target.x+16-a.x,target.y+21-a.y)))target={x:boss.x+boss.w/2-16,y:boss.y+boss.h/2-21};if(target){const speed=Math.hypot(a.vx,a.vy),desired=Math.atan2(target.y+21-a.y,target.x+16-a.x),current=Math.atan2(a.vy,a.vx),delta=Math.atan2(Math.sin(desired-current),Math.cos(desired-current)),turn=Math.max(-3.8*dt,Math.min(3.8*dt,delta));a.vx=Math.cos(current+turn)*speed;a.vy=Math.sin(current+turn)*speed}}a.x+=a.vx*dt;a.y+=a.vy*dt;a.life-=dt;if(a.type==='arrow'&&a.element==='ice'&&player.vortex&&player.vortex.element==='magma'&&player.vortex.life>0&&!a.steamBurst&&Math.hypot(a.x-player.vortex.x,a.y-player.vortex.y)<25){a.steamBurst=true;burst(a.x,a.y,'#b8f8ff',18);particles.push({x:a.x,y:a.y-18,vx:0,vy:-25,life:.65,max:.65,color:'#d6ffff',size:13,text:'STEAM BURST'});for(const e of enemies){if(e.hp>0&&Math.hypot(e.x+16-a.x,e.y+21-a.y)<92){e.hp=Math.max(0,e.hp-enemyHitDamage(e,2,e.x+16,e.y+20));burst(e.x+16,e.y+20,'#b8f8ff',7)}}}if(a.type==='arrow'&&player.vortex&&player.vortex.life>0&&!a.split&&Math.hypot(a.x-player.vortex.x,a.y-player.vortex.y)<23){a.split=true;a.pierce=true;a.hitTargets=new Set();const baseAngle=Math.atan2(a.vy,a.vx),speed=Math.hypot(a.vx,a.vy);for(const offset of [-.24,.24])shots.push({x:a.x,y:a.y,vx:Math.cos(baseAngle+offset)*speed,vy:Math.sin(baseAngle+offset)*speed,life:2.8,type:'arrow',element:a.element,steamBurst:a.steamBurst,damage:a.damage*.72,void:true,pierce:true,hitTargets:new Set(),split:true})}if(a.type!=='chakram'&&(a.x-camera<0||a.x-camera>W)){a.life=0;continue}const hitbox=a.type==='rift'?{x:a.x-22,y:a.y-12,w:44,h:24}:a.type==='shard'?{x:a.x-7,y:a.y-7,w:14,h:14}:a.type==='needle'?{x:a.x-6,y:a.y-6,w:12,h:12}:a.type==='rootwake'?{x:a.x-18,y:a.y-16,w:36,h:32}:a.type==='chakram'?{x:a.x-15,y:a.y-15,w:30,h:30}:{x:a.x-10,y:a.y-3,w:20,h:6},damageAmount=a.damage||1;if(a.type==='chakram'&&a.returning){hitReturningChakram(a,hitbox);continue}
  const targetShot=stage==='tutorial'?(tutorialRooms[tutorial.room].targetShot||'arrow'):null;
- let hit=enemies.find(e=>e.hp>0&&(e.type!=='target'||a.type===targetShot)&&(!a.hitTargets||!a.hitTargets.has(e))&&rect(hitbox,{x:e.x,y:e.y,w:32,h:42}));if(hit){const rangedDamage=enemyHitDamage(hit,damageAmount+essenceDamage(hit),hit.x+15,hit.y+18,hit.type==='target',a.counterShot);hit.hp=Math.max(0,hit.hp-rangedDamage);if(rangedDamage>0&&(a.type==='arrow'||a.type==='shard')){if(!(hit.marked>0)){particles.push({x:hit.x+16,y:hit.y-6,vx:0,vy:-30,life:.85,max:.85,color:'#a6f7ff',size:12,text:'MARKED · SWORD OR CHAKRAM'})}hit.marked=2.5}if(a.type==='rootwake')hit.rooted=Math.max(hit.rooted||0,.65);if(a.type==='shard')hit.cosmicBrand=3.2;applyEssenceEffects(hit,Math.sign(a.vx));if(stage==='castle'&&hit.hp<=0)updateCastleProgress();if(a.type==='chakram'){a.outboundTarget=hit;a.returning=true}else if(a.pierce)a.hitTargets.add(hit);else a.life=0;burst(hit.x+15,hit.y+18,a.type==='rootwake'?'#b9ef83':a.void?'#a94feb':a.type==='shard'?'#c99cff':a.type==='arrow'&&a.element==='ice'?'#8beaff':'#ffd477',a.type==='shard'?9:6)}else if(boss&&boss.hp>0&&(!a.pierce||!a.hitBoss)&&rect(hitbox,{x:boss.x,y:boss.y+12,w:boss.w,h:boss.h-20})){if(a.type==='chakram'){a.outboundTarget=boss;a.returning=true}else if(a.pierce)a.hitBoss=true;else a.life=0;if(!boss.armor){boss.hp=Math.max(0,boss.hp-bossHitDamage(boss.x+(a.vx>0?0:boss.w),boss.y+58,15*(a.damageMultiplier||1),a.counterShot));applyEssenceEffects(boss,Math.sign(a.vx));burst(boss.x+(a.vx>0?0:boss.w),boss.y+58,a.void?'#a94feb':a.type==='shard'?'#c99cff':'#ffd477',a.type==='shard'?10:8);updateHud();if(boss.hp<=0)advanceBossLevel()}else burst(a.x,a.y,a.type==='shard'?'#c99cff':'#aebfce',5)}}shots=shots.filter(a=>a.life>0);
+ let hit=enemies.find(e=>e.hp>0&&(e.type!=='target'||a.type===targetShot)&&(!a.hitTargets||!a.hitTargets.has(e))&&rect(hitbox,{x:e.x,y:e.y,w:32,h:42}));if(hit){const rangedDamage=enemyHitDamage(hit,damageAmount+essenceDamage(hit),hit.x+15,hit.y+18,hit.type==='target',a.counterShot,false,a.type==='arrow'?'bow':null);hit.hp=Math.max(0,hit.hp-rangedDamage);if(rangedDamage>0&&(a.type==='arrow'||a.type==='shard')){if(!(hit.marked>0)){particles.push({x:hit.x+16,y:hit.y-6,vx:0,vy:-30,life:.85,max:.85,color:'#a6f7ff',size:12,text:'MARKED · SWORD OR CHAKRAM'})}hit.marked=2.5}if(a.type==='rootwake')hit.rooted=Math.max(hit.rooted||0,.65);if(a.type==='shard')hit.cosmicBrand=3.2;applyEssenceEffects(hit,Math.sign(a.vx));if(stage==='castle'&&hit.hp<=0)updateCastleProgress();if(a.type==='chakram'){a.outboundTarget=hit;a.returning=true}else if(a.pierce)a.hitTargets.add(hit);else a.life=0;burst(hit.x+15,hit.y+18,a.type==='rootwake'?'#b9ef83':a.void?'#a94feb':a.type==='shard'?'#c99cff':a.type==='arrow'&&a.element==='ice'?'#8beaff':'#ffd477',a.type==='shard'?9:6)}else if(boss&&boss.hp>0&&(!a.pierce||!a.hitBoss)&&rect(hitbox,{x:boss.x,y:boss.y+12,w:boss.w,h:boss.h-20})){if(a.type==='chakram'){a.outboundTarget=boss;a.returning=true}else if(a.pierce)a.hitBoss=true;else a.life=0;if(!boss.armor){boss.hp=Math.max(0,boss.hp-bossHitDamage(boss.x+(a.vx>0?0:boss.w),boss.y+58,15*(a.damageMultiplier||1),a.counterShot));applyEssenceEffects(boss,Math.sign(a.vx));burst(boss.x+(a.vx>0?0:boss.w),boss.y+58,a.void?'#a94feb':a.type==='shard'?'#c99cff':'#ffd477',a.type==='shard'?10:8);updateHud();if(boss.hp<=0)advanceBossLevel()}else burst(a.x,a.y,a.type==='shard'?'#c99cff':'#aebfce',5)}}shots=shots.filter(a=>a.life>0);
  fireballs=fireballs.filter(a=>a.life>0&&a.x>-50&&a.x<worldW+50&&a.y>-100&&a.y<H+100);for(const a of fireballs){a.x+=a.vx*dt;a.y+=a.vy*dt;if(a.ay)a.vy+=a.ay*dt;a.life-=dt;if(stage==='boss'&&(a.x<arena.left+30||a.x>arena.right-30))a.life=0;const radius=a.kind==='steel'?15:11;if(rect({x:a.x-radius,y:a.y-radius,w:radius*2,h:radius*2},{x:p.x,y:p.y,w:p.w,h:p.h})){a.life=0;let comingFromFront=p.face>0?a.x>p.x+p.w/2:a.x<p.x+p.w/2;if(p.block>0&&comingFromFront)burst(a.x,a.y,'#ffd477',6);else damage(true,a.x)}}
  for(const e of enemies){if(e.elite&&e.hp<=0&&!e.splitDone){e.splitDone=true;for(const dir of [-1,1])enemies.push({x:Math.max(e.min,Math.min(e.max,e.x+dir*20)),y:groundY-42,min:e.min,max:e.max,dir,hp:2,maxHp:2,t:.35,swing:0,swingDuration:.34,swingHit:false,kind:'knight',armored:false,type:'stalker',clone:true,cooldown:.45})}}
  if(stage==='storyMission'){
@@ -2908,6 +3229,8 @@ function update(dt){if(gameState!=='playing')return;dt=Math.min(dt,.033);if(vict
   }
  }
  if(gameState!=='playing')return;
+ if(rematch)updateHud();
+ if(stage==='practice')updatePractice(dt);
  if(stage==='endless')updateEndlessWave(dt);
  updateCampaignTrial(dt);
  if(gameState!=='playing')return;
@@ -4228,6 +4551,7 @@ function drawWorld(){
  if(stage==='causeway'){for(const z of waterZones){ctx.fillStyle='#62d7ec55';ctx.fillRect(z.x,z.y,z.w,z.h);ctx.strokeStyle='#b9f8ff';ctx.lineWidth=2;ctx.beginPath();for(let x=z.x;x<=z.x+z.w;x+=14){const y=z.y+Math.sin(performance.now()/260+x*.04)*3;if(x===z.x)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.stroke()}}
 
  if(stage==='storyMission'&&storyMission)drawStoryMission();
+ if(stage==='storyCamp'||stage==='secret')drawSecretEntrance();
  if(stage==='endless')drawEndlessReinforcements();
  drawCampaignTrial();
  if(stage==='tutorial')drawTutorialGates();
@@ -4260,8 +4584,12 @@ function drawWorld(){
  drawDashDecoys();enemies.forEach(e=>{if(e.hp>0){const floor=platforms.filter(pl=>e.x+16>pl.x&&e.x+16<pl.x+pl.w&&pl.y>=e.y+42).reduce((best,pl)=>Math.min(best,pl.y),groundY);drawActorShadow(e.x,floor,32,Math.max(0,floor-(e.y+42)));drawEnemyRegalia(e);drawEnemy(e);drawEnemyArtUpgrade(e);drawEnemyTelegraph(e);if(e.impactFlash>0){
   ctx.save();ctx.globalAlpha=e.impactFlash/.11*.7;ctx.strokeStyle='#ffeac7';ctx.lineWidth=2;
   ctx.beginPath();ctx.ellipse(e.x+16,e.y+20,19,25,0,0,Math.PI*2);ctx.stroke();ctx.restore();
- }if(e.marked>0){ctx.strokeStyle='#8bf3ff';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x+16,e.y+22,23,29,0,0,Math.PI*2);ctx.stroke()}if(e.cosmicBrand>0){ctx.strokeStyle='#bd91ff';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x+16,e.y+22,25,31,0,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#aaf4ff';ctx.beginPath();ctx.arc(e.x+16,e.y-5,2,0,Math.PI*2);ctx.fill()}if(e.elite){drawHealthBar(e.x-5,e.y-14,42,e.hp,e.maxHp,'#e7a5ff');ctx.fillStyle='#fff0bb';ctx.font='800 9px system-ui';ctx.textAlign='center';ctx.fillText('ELITE',e.x+16,e.y-18)}}});
- arrows.forEach(a=>{ctx.save();ctx.translate(a.x,a.y);ctx.rotate(Math.atan2(a.vy,a.vx));if(a.type==='shard'){ctx.fillStyle='#e0b84f';ctx.strokeStyle='#26364d';ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(-10,0);ctx.lineTo(-4,-5);ctx.lineTo(7,-4);ctx.lineTo(11,0);ctx.lineTo(7,4);ctx.lineTo(-4,5);ctx.closePath();ctx.fill();ctx.stroke();ctx.strokeStyle='#fff0a0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-5,0);ctx.lineTo(7,0);ctx.stroke()}else{ctx.lineCap='round';ctx.strokeStyle='#142b3e';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(11,0);ctx.stroke();ctx.strokeStyle='#f4fbff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(9,0);ctx.stroke();ctx.fillStyle='#142b3e';ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(7,-5);ctx.lineTo(7,5);ctx.closePath();ctx.fill();ctx.fillStyle='#ffedb4';ctx.beginPath();ctx.moveTo(12,0);ctx.lineTo(7,-3);ctx.lineTo(7,3);ctx.closePath();ctx.fill()}ctx.restore()});
+ }if(e.marked>0){ctx.strokeStyle='#8bf3ff';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x+16,e.y+22,23,29,0,0,Math.PI*2);ctx.stroke()}if(e.cosmicBrand>0){ctx.strokeStyle='#bd91ff';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x+16,e.y+22,25,31,0,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#aaf4ff';ctx.beginPath();ctx.arc(e.x+16,e.y-5,2,0,Math.PI*2);ctx.fill()}if(e.elite){drawHealthBar(e.x-5,e.y-14,42,e.hp,e.maxHp,'#e7a5ff');ctx.fillStyle='#fff0bb';ctx.font='800 9px system-ui';ctx.textAlign='center';ctx.fillText(e.rival?`${e.rival.weapon.toUpperCase()} RIVAL`:'ELITE',e.x+16,e.y-18)}}});
+ arrows.forEach(a=>{ctx.save();ctx.translate(a.x,a.y);
+  if(a.rivalDisk){
+   ctx.rotate(a.age*14);ctx.scale(.40,.40);drawTideShuriken();ctx.restore();return;
+  }
+  ctx.rotate(Math.atan2(a.vy,a.vx));if(a.type==='shard'){ctx.fillStyle='#e0b84f';ctx.strokeStyle='#26364d';ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(-10,0);ctx.lineTo(-4,-5);ctx.lineTo(7,-4);ctx.lineTo(11,0);ctx.lineTo(7,4);ctx.lineTo(-4,5);ctx.closePath();ctx.fill();ctx.stroke();ctx.strokeStyle='#fff0a0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-5,0);ctx.lineTo(7,0);ctx.stroke()}else{ctx.lineCap='round';ctx.strokeStyle='#142b3e';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(11,0);ctx.stroke();ctx.strokeStyle='#f4fbff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(9,0);ctx.stroke();ctx.fillStyle='#142b3e';ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(7,-5);ctx.lineTo(7,5);ctx.closePath();ctx.fill();ctx.fillStyle='#ffedb4';ctx.beginPath();ctx.moveTo(12,0);ctx.lineTo(7,-3);ctx.lineTo(7,3);ctx.closePath();ctx.fill()}ctx.restore()});
  shots.forEach(a=>{if(a.trail&&a.trail.length>1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.strokeStyle=a.type==='chakram'?(a.scoredReturn?'#ffeda2':'#aee3ff'):a.type==='shard'?'#c394ff':a.element==='ice'?'#b8f5ff':'#9ceaff';for(let i=1;i<a.trail.length;i++){ctx.globalAlpha=.1+i*.07;ctx.lineWidth=1.4+i*.85;ctx.beginPath();ctx.moveTo(a.trail[i-1].x,a.trail[i-1].y);ctx.lineTo(a.trail[i].x,a.trail[i].y);ctx.stroke()}ctx.restore()}ctx.save();ctx.translate(a.x,a.y);ctx.rotate(a.type==='chakram'?performance.now()/72:Math.atan2(a.vy,a.vx)+(a.type==='shard'&&a.void&&!a.burst?Math.sin(performance.now()*.012+a.x*.03)*.24:0));ctx.shadowColor=a.element==='dawn'?'#ffd548':a.element==='storm'?'#ffd52b':a.element==='ice'?'#70dcff':'#a84ee8';ctx.shadowBlur=0;if(a.burst||a.volleyArt){drawAbilityProjectile(a)}else if(a.type==='rootwake'){ctx.shadowColor='#9de979';ctx.shadowBlur=5;ctx.fillStyle='#497d3d';ctx.strokeStyle='#203a35';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-18,0);ctx.lineTo(-7,-6);ctx.lineTo(0,-3);ctx.lineTo(16,0);ctx.lineTo(0,3);ctx.lineTo(-7,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#c7f29a';ctx.beginPath();ctx.moveTo(-2,0);ctx.lineTo(7,-3);ctx.lineTo(17,0);ctx.lineTo(7,3);ctx.closePath();ctx.fill();ctx.shadowBlur=0}else if(a.type==='arrow'&&a.void&&!a.element){const pulse=.65+.35*Math.sin(performance.now()*.018+a.x*.04);ctx.shadowColor='#ad5cff';ctx.shadowBlur=8*pulse;ctx.strokeStyle='#3c185f';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(-25,0);ctx.lineTo(5,0);ctx.stroke();ctx.strokeStyle='#a84fff';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-24,0);ctx.quadraticCurveTo(-12,-4*Math.sin(performance.now()*.015),4,0);ctx.stroke();ctx.strokeStyle='#e3b5ff';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(-18,-2);ctx.lineTo(2,-1);ctx.stroke();ctx.shadowBlur=9*pulse;ctx.fillStyle='#d6a0ff';ctx.strokeStyle='#35184f';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(15,0);ctx.lineTo(4,-6);ctx.lineTo(7,0);ctx.lineTo(4,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(12,0);ctx.lineTo(5,-2);ctx.lineTo(7,0);ctx.lineTo(5,2);ctx.closePath();ctx.fill();ctx.shadowBlur=0;for(let i=0;i<3;i++){const twinkle=(performance.now()*.004+i*2.1+a.x*.015),tx=-10-i*6,ty=Math.sin(twinkle)*3;ctx.globalAlpha=.45+.45*Math.sin(twinkle);ctx.fillStyle=i%2?'#87efff':'#e8caff';ctx.beginPath();ctx.arc(tx,ty,1.3,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1}else if(a.type==='shard'&&a.void&&!a.burst){const pulse=.65+.35*Math.sin(performance.now()*.015+a.x*.025);ctx.shadowColor='#a455ff';ctx.shadowBlur=10*pulse;ctx.fillStyle='#211037';ctx.strokeStyle='#9a5be0';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(-4,-8);ctx.lineTo(5,-6);ctx.lineTo(12,0);ctx.lineTo(4,8);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.shadowBlur=0;const crystal=ctx.createLinearGradient(-8,-6,8,6);crystal.addColorStop(0,'#e8c7ff');crystal.addColorStop(.42,'#9d5be8');crystal.addColorStop(1,'#4c2a86');ctx.fillStyle=crystal;ctx.beginPath();ctx.moveTo(-8,0);ctx.lineTo(-3,-5);ctx.lineTo(2,0);ctx.lineTo(-3,5);ctx.closePath();ctx.fill();ctx.fillStyle='#d8faff';ctx.beginPath();ctx.moveTo(2,-5);ctx.lineTo(10,0);ctx.lineTo(2,5);ctx.lineTo(-1,0);ctx.closePath();ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-8,0);ctx.lineTo(2,0);ctx.stroke();ctx.globalAlpha=.65+.35*Math.sin(performance.now()*.02+a.y*.04);ctx.fillStyle='#8ef5ff';ctx.beginPath();ctx.arc(-1,0,1.7,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}else if(a.type==='chakram'){ctx.scale(.40,.40);drawTideShuriken()}else if(a.type==='needle'){ctx.fillStyle='#16152b';ctx.strokeStyle='#a783f0';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(-8,0);ctx.lineTo(-2,-2);ctx.lineTo(8,0);ctx.lineTo(-2,2);ctx.closePath();ctx.fill();ctx.stroke();ctx.strokeStyle='#aaf6ff';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-3,0);ctx.lineTo(7,0);ctx.stroke()}else if(a.type==='rift'&&a.element==='dawn'){ctx.shadowColor='#ffbd32';ctx.shadowBlur=13;const glow=ctx.createLinearGradient(-23,0,23,0);glow.addColorStop(0,'#f4a92c');glow.addColorStop(.5,'#fffbe1');glow.addColorStop(1,'#f4a92c');ctx.fillStyle=glow;ctx.beginPath();ctx.moveTo(-23,0);ctx.quadraticCurveTo(-4,-5,0,-12);ctx.quadraticCurveTo(5,-4,23,0);ctx.quadraticCurveTo(4,5,0,12);ctx.quadraticCurveTo(-5,4,-23,0);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='#fff8c9';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-16,0);ctx.lineTo(16,0);ctx.moveTo(0,-8);ctx.lineTo(0,8);ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,2.5,0,Math.PI*2);ctx.fill()}else if(a.type==='rift'&&a.element==='storm'){ctx.strokeStyle='#ffd32e';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-20,0);ctx.lineTo(-5,-3);ctx.lineTo(0,-11);ctx.lineTo(6,5);ctx.lineTo(11,-5);ctx.lineTo(21,0);ctx.stroke();ctx.strokeStyle='#fff6b5';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(-18,1);ctx.lineTo(-4,-2);ctx.lineTo(1,-8);ctx.lineTo(7,3);ctx.lineTo(12,-3);ctx.lineTo(20,0);ctx.stroke()}else if(a.type==='arrow'&&a.element==='ice'){ctx.fillStyle='#72dfff';ctx.strokeStyle='#eaffff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(-3,-4);ctx.lineTo(12,0);ctx.lineTo(-3,4);ctx.closePath();ctx.fill();ctx.stroke();ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-5,0);ctx.lineTo(9,0);ctx.stroke()}else if(a.type==='rift'){ctx.fillStyle='#090713';ctx.beginPath();ctx.ellipse(0,0,23,9,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#a94feb';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,0,22,10,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#7df3ff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-16,1);ctx.lineTo(-7,-4);ctx.lineTo(1,4);ctx.lineTo(10,-4);ctx.lineTo(17,0);ctx.stroke()}else if(a.type==='shard'){ctx.fillStyle=a.void?'#221135':'#e0b84f';ctx.strokeStyle=a.void?'#aa5be8':'#24364f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-13,0);ctx.lineTo(-5,-6);ctx.lineTo(8,-5);ctx.lineTo(14,0);ctx.lineTo(8,5);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.strokeStyle=a.void?'#a5f5ff':'#fff0a0';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(-8,0);ctx.lineTo(7,0);ctx.stroke();ctx.fillStyle=a.void?'#d8faff':'#fff0c2';ctx.beginPath();ctx.moveTo(11,0);ctx.lineTo(6,-2);ctx.lineTo(6,2);ctx.closePath();ctx.fill()}else{ctx.lineCap='round';ctx.strokeStyle=a.void?'#26123e':'#183144';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-11,0);ctx.lineTo(9,0);ctx.stroke();ctx.strokeStyle=a.void?'#9e54d8':'#bd8d3e';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-10,0);ctx.lineTo(8,0);ctx.stroke();ctx.fillStyle=a.void?'#aef7ff':'#edc65e';ctx.strokeStyle=a.void?'#25113c':'#183144';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(12,0);ctx.lineTo(5,-4);ctx.lineTo(5,4);ctx.closePath();ctx.fill();ctx.stroke()}ctx.restore()});
  if(boss&&(boss.hp>0||victorySequence)){drawActorShadow(boss.x,groundY,boss.w,Math.max(0,groundY-(boss.y+boss.h)));drawGuardianHalo(boss);drawBoss()}if(boss&&boss.cue)drawBossTelegraph(boss.cue);if(victorySequence)drawChampionLastWords();drawBossHazards();fireballs.forEach(a=>{const look={flame:['#ff5b35','#fff0a3'],thorn:['#70aa46','#d4f087'],ice:['#64cde8','#e4fbff'],steel:['#8c9eae','#e4edf2'],sand:['#d49b54','#f5d98a'],gravity:['#926be0','#edc7ff'],storm:['#f3d84f','#fff7bb'],shadow:['#423657','#c7a8ec'],crystal:['#ee92d1','#fff0fb']}[a.kind]||['#ff5b35','#fff0a3'];ctx.save();ctx.translate(a.x,a.y);ctx.rotate(Math.atan2(a.vy,a.vx));ctx.shadowColor=look[0];ctx.shadowBlur=6;ctx.fillStyle=look[0];ctx.beginPath();if(a.kind==='thorn'){ctx.moveTo(-12,0);ctx.lineTo(0,-7);ctx.lineTo(13,0);ctx.lineTo(0,7);ctx.closePath()}else if(a.kind==='ice'){ctx.moveTo(0,-11);ctx.lineTo(8,0);ctx.lineTo(0,11);ctx.lineTo(-8,0);ctx.closePath()}else if(a.kind==='steel'){roundRect(-12,-6,24,12,2)}else if(a.kind==='storm'){ctx.moveTo(-5,-10);ctx.lineTo(3,-2);ctx.lineTo(-2,0);ctx.lineTo(6,10);ctx.lineTo(2,2);ctx.lineTo(6,0);ctx.closePath()}else if(a.kind==='shadow'){ctx.arc(0,0,10,0,Math.PI*2);ctx.moveTo(2,-8);ctx.quadraticCurveTo(-7,0,2,8);ctx.quadraticCurveTo(-2,0,2,-8)}else if(a.kind==='crystal'){ctx.moveTo(0,-12);ctx.lineTo(8,-3);ctx.lineTo(6,7);ctx.lineTo(0,12);ctx.lineTo(-6,7);ctx.lineTo(-8,-3);ctx.closePath()}else{ctx.ellipse(0,0,a.kind==='flame'?14:12,8,0,0,Math.PI*2)}ctx.fill();ctx.fillStyle=look[1];ctx.beginPath();ctx.arc(0,0,3,0,Math.PI*2);ctx.fill();ctx.restore()});
  const playerCenter=player.x+player.w/2;
@@ -4890,6 +5218,9 @@ function drawEnemy(e){
   ctx.strokeStyle=trim;ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(0,-15);ctx.lineTo(0,14);ctx.moveTo(0,-2);ctx.lineTo(12,-2);ctx.stroke();
   actorPlate([[10,-4],[14,-2],[10,0]],'#fff0ca',ink,.7);
+ }else if(e.rival?.weapon==='chakram'){
+  ctx.translate(7,-6);ctx.scale(.33,.33);
+  drawTideShuriken();
  }else{
   ctx.strokeStyle=ink;ctx.lineWidth=5;
   ctx.beginPath();ctx.moveTo(-5,10);ctx.lineTo(8,-17);ctx.stroke();
@@ -5317,8 +5648,10 @@ function drawEquippedWeapon(p,x,y,worldX,worldY){
  const swingActive=p.weapon==='sword'&&p.swing>0,swing=swingActive?swordSwingOffset(p.swing,p.swingDuration):0,lunge=swingActive?swordSwingLunge(p.swing,p.swingDuration):0,equipDuration=p.weaponEquipDuration||.9,equipLeft=p.weaponDrawKind===p.weapon?Math.max(0,Math.min(equipDuration,p.weaponEquipTimer||0)):0,equipT=1-equipLeft/equipDuration,equipEase=equipT*equipT*(3-2*equipT),equipPop=Math.sin(equipT*Math.PI),equipSpin=equipLeft>0?(1-equipEase)*Math.PI*2.35:0,equipFlip=equipLeft>0?.2+.8*Math.abs(Math.cos(equipT*Math.PI*2)):1,handX=x+25+lunge*5,handY=y+25-lunge*2-(equipLeft>0?equipPop*5:0);
  const aim=mouse.active?Math.atan2(mouse.y-(worldY+23),Math.abs(mouse.x+camera-(worldX+15))):0;
  ctx.save();ctx.translate(handX,handY);ctx.lineJoin='round';ctx.lineCap='round';
+ const finish=secretRooms.find(room=>room.weapon===p.weapon&&weaponFinishes[p.weapon]===room.finish);
+ if(finish)ctx.filter=finish.filter;
  if(p.weapon==='sword'){
-  const drive=p.swing>0?lunge*7:0;ctx.translate(drive,0);ctx.rotate(-.62+swing+equipSpin);ctx.scale(.39,.39*equipFlip);
+  const drive=p.swing>0?lunge*7:0;ctx.translate(drive,0);ctx.rotate(p.downStrike>0?Math.PI/2:-.62+swing+equipSpin);ctx.scale(.39,.39*equipFlip);
   drawRiptideBlades();
  }else if(p.weapon==='bow'){
   const recoil=p.attackAnim?.kind==='bow'?Math.sin((1-p.attackAnim.time/p.attackAnim.max)*Math.PI):0,drawEase=equipEase,drawPop=equipLeft>0?Math.sin(equipT*Math.PI):0;ctx.translate(-drawPop*12,-drawPop*10);ctx.rotate(aim-(1-drawEase)*1.22-recoil*.12);ctx.translate(-recoil*8,0);const bowDrawScale=equipLeft>0?.72+.28*drawEase:1;ctx.scale(.68*bowDrawScale,.68*bowDrawScale);
@@ -5379,6 +5712,13 @@ function drawGroundRoll(player,trail){
 }
 
 function drawPlayer(){
+ if(player.downStrike>0){
+  const x=player.x+player.w/2,y=player.y+player.h;
+  ctx.save();
+  ctx.strokeStyle='#8ff6ff';ctx.lineWidth=2.2;ctx.globalAlpha=.86;
+  ctx.beginPath();ctx.moveTo(x-23,y-9);ctx.quadraticCurveTo(x-17,y+21,x,y+38);
+  ctx.quadraticCurveTo(x+18,y+21,x+23,y-9);ctx.stroke();ctx.restore();
+ }
  if(player.dashTimer>0&&player.dashTrail?.groundRoll){
   drawDashTrail(player);
   drawGroundRoll(player,player.dashTrail);
