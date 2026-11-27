@@ -167,16 +167,12 @@
     .overlay .keys{margin:9px 0 13px}
     .game[data-view="title"] .overlay .card h1{font-size:clamp(30px,8vh,50px)}
   }
-  .sound-toggle{display:none;position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:12;padding:5px 9px;border:1px solid #b3c8da88;border-radius:5px;background:#172239d9;color:#eef6fa;font:700 11px system-ui;cursor:pointer}
-  .game[data-view="playing"] .sound-toggle{display:block}
-  @media(max-width:540px){.sound-toggle{top:68px}}
 </style>
 </head>
 <body>
 <main class="frame"><section class="game" data-view="title" aria-label="Shardbound browser game">
   <canvas id="game" aria-label="Side scrolling knight platform game"></canvas>
   <div class="hud"><div><div class="brand">Shardbound</div><div class="score"><span id="score">0</span> <small>／ 10 SHARDS</small></div><div class="weapon" id="weapon">SWORD [1]</div></div><div class="right-hud"><div class="health"><div class="health-track"><div class="health-fill" id="healthFill"></div></div><span id="healthText">20 / 20</span></div><div class="progress" id="progress">WORLD 1 · LEVEL 1 / 3</div><div class="ability" id="ability">GRASSLAND</div></div></div>
-  <button type="button" class="sound-toggle" id="soundToggle" aria-label="Sound effects" aria-pressed="true">Sound on</button>
   <div class="touch" aria-label="Touch game controls"><div class="cluster" aria-label="Movement controls"><button aria-label="Move left" data-key="ArrowLeft">←</button><button aria-label="Move right" data-key="ArrowRight">→</button><button aria-label="Jump / double jump" data-key="Space">↑</button><button aria-label="Drop through platform" data-action="drop">↓</button></div><div class="weapons" aria-label="Weapon selection"><button aria-label="Select Riptide Katana" data-weapon="sword">1</button><button aria-label="Select bow" data-weapon="bow">2</button><button aria-label="Select shardstaff" data-weapon="staff">3</button><button aria-label="Select Tide of the Stars chakram" data-weapon="chakram">4</button></div><div class="actions" aria-label="Combat actions"><button aria-label="Attack; sword combo is small, small, big" data-action="attack">⚔</button><button aria-label="Weapon ability" data-action="special">E</button><button aria-label="Dash" data-action="dash">Q</button><button aria-label="Shard burst" data-action="burst">R</button><button aria-label="Pause" data-action="pause">Ⅱ</button></div></div>
   <div class="overlay" id="overlay"><div class="card"><div class="eyebrow">The elements awaken</div><h1>Shardbound</h1><p id="introText">Oh no! The guardians took the shiny shards. Grab your weapons, bonk the bad guys, and reclaim them across 15 elemental stages!</p><div class="keys" id="keySummary"><div class="key"><b>WASD / TOUCH</b><span>Move / jump / drop</span></div><div class="key"><b>1 / 2 / 3 / 4</b><span>Choose weapon</span></div><div class="key"><b>Tap / click</b><span>Attack</span></div><div class="key"><b>E / Q</b><span>Ability / dash</span></div></div><div class="mode-buttons"><button class="button" id="start" type="button" onclick="return window.shardboundShowDeviceChoice(event)">Begin journey</button><button class="button mode-secondary" id="storyStart" type="button">Story Mode</button><button class="button mode-secondary" id="endlessStart" type="button">Endless</button><button class="button mode-secondary" id="tutorialStart" type="button">Tutorial</button></div><button class="story-skip mode-link hidden" id="storyQuit" type="button">Return to title</button><div class="device-choice hidden" id="deviceChoice" aria-label="Choose a control mode"><button class="button" id="pcStart" type="button" onclick="return window.shardboundSelectDevice('pc',event)" onpointerdown="return window.shardboundSelectDevice('pc',event)">PC / Laptop</button><button class="button" id="mobileStart" type="button" onclick="return window.shardboundSelectDevice('mobile',event)" onpointerdown="return window.shardboundSelectDevice('mobile',event)">Mobile</button></div><p class="note" id="gameNote">Find the shiny shards, beat the big bosses, and save the worlds. You can do it!</p></div></div>
   <div class="tutorial-tip hidden" id="tutorialTip"><span role="status" id="tutorialText"></span><div class="tutorial-actions"><button id="tutorialSkip" type="button">Skip drill</button><button id="tutorialDismiss" type="button">Exit tutorial</button></div></div>
@@ -240,128 +236,6 @@ const scoreEl=document.querySelector('#score'),scoreLabelEl=document.querySelect
 const W=960,H=540,campaignWidth=3000,campaignShardGoal=10;let worldW=campaignWidth;canvas.tabIndex=0;canvas.addEventListener('pointerdown',()=>canvas.focus());let scale=1,viewX=0,viewY=0,lastDraw=0,hasDrawn=false,loopStarted=false,keys={},gameState='title',last=0,camera=0,particles=[],pickupEffects=[],ambientParticles=[],ambientTimer=0,springPads=[],shake=0,victorySequence=null,mouse={x:W/2,y:H/2,active:false};
 function resize(){const r=canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);scale=Math.min(canvas.width/W,canvas.height/H);viewX=(canvas.width-W*scale)/2;viewY=(canvas.height-H*scale)/2;ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#101c2d';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.setTransform(scale,0,0,scale,viewX,viewY);hasDrawn=false}window.addEventListener('resize',resize);resize();
 const groundY=460,groundRunSpeed=360,dashSpeed=780,dashDistance=172,dashDuration=.245,minimumJumpSpeed=405;
-const soundSampleRate=24000;
-// Layers use a material, duration, start/end frequency, level, and optional offset.
-const gameSounds={
- jump:[['leather',.18,790,1340,.51],['stone',.11,135,105,.42],['air',.19,420,1120,.28,.025]],
- dash:[['air',.34,470,2630,.75],['grit',.17,4300,1400,.36,.065],['air',.28,3200,920,.36,.115]],
- sword:[['air',.19,570,3490,.62],['grit',.12,2510,5100,.29,.027],['metal',.25,725,709,.29,.058]],
- bow:[['wood',.29,202,197,.69],['grit',.093,5400,1540,.38,.005],['air',.20,2710,1140,.21,.034]],
- staff:[['fire',.35,1420,730,.64],['stone',.29,172,122,.35],['air',.27,720,1790,.30,.079]],
- chakram:[['metal',.44,946,806,.46],['air',.33,1350,3700,.50],['air',.18,4560,1640,.23,.12]],
- shard:[['ice',.49,829,825,.61],['ice',.39,1280,1275,.25,.045],['grit',.18,4600,2200,.15,.01]],
-};
-// Resonators are intentionally inharmonic. Higher modes decay before the body of the sound.
-const soundResonators={
- stone:[[1,.72,3.2],[1.84,.28,7.5],[3.12,.13,11]],
- wood:[[1,.64,4.3],[2.02,.33,7.5],[3.37,.25,11],[5.01,.11,17]],
- metal:[[1,.68,2.3],[1.498,.32,4],[2.126,.28,6.1],[3.53,.19,8.6],[5.03,.10,13]],
- ice:[[1,.55,3.2],[1.366,.30,5.3],[2.447,.27,7.5],[3.82,.14,12.4],[5.29,.11,14]]
-};
-function renderGameSound(name){
- const voices=gameSounds[name];
- const duration=Math.max(...voices.map(([,time,,,,delay=0])=>time+delay));
- const samples=new Float32Array(Math.ceil(duration*soundSampleRate));
- let seed=23917;
- for(const [material,time,start,end,volume,delay=0] of voices){
-  const frames=Math.floor(time*soundSampleRate),offset=Math.floor(delay*soundSampleRate);
-  const modes=soundResonators[material];
-  const hue=Math.log(end/start);
-  let phase=0,low=0,high=0,transient=0;
-  for(let i=0;i<frames;i++){
-   const t=i/frames,hz=start*Math.exp(hue*t);
-   phase+=hz*Math.PI*2/soundSampleRate;
-   let frame=0,envelope;
-   if(modes){
-    for(const [ratio,level,damping] of modes){
-     if(hz*ratio<soundSampleRate*.45)frame+=Math.sin(phase*ratio)*level*Math.exp(-t*damping);
-    }
-    envelope=Math.min(1,i/60)*Math.min(1,(1-t)*8);
-   }else{
-    seed=(Math.imul(seed,1664525)+1013904223)>>>0;
-    const white=seed/2147483648-1;
-    low+=(1-Math.exp(-6.283*hz/soundSampleRate))*(white-low);
-    high+=(1-Math.exp(-1.52*hz/soundSampleRate))*(low-high);
-    transient*=.946;
-    if(Math.abs(white)>.968)transient=white;
-    frame=(low-high)*2.6;
-    envelope=Math.sin(Math.PI*t)**(material==='air'?.95:.52)*(1-t)**(material==='air'?.55:1.25);
-    if(material==='grit')frame=frame*.73+transient*.67;
-    if(material==='leather')frame=(frame*.75+low*.3)*(.75+.25*Math.cos(t*16));
-    if(material==='fire')frame=frame*.57+transient*.92;
-   }
-   samples[offset+i]+=frame*envelope*volume;
-  }
- }
- let peak=0;
- for(const sample of samples)peak=Math.max(peak,Math.abs(sample));
- const gain=(name==='shard'?.59:.76)/Math.max(peak,.01);
- for(let i=0;i<samples.length;i++)samples[i]*=gain;
- return samples;
-}
-const soundToggle=document.querySelector('#soundToggle');
-const soundSetting='shardboundSoundMuted';
-let soundMuted=false,audio,masterSound;
-const soundBuffers=new Map(),lastSound=new Map();
-let voicesPlaying=0,soundVariationSeed=81234;
-try{soundMuted=localStorage.getItem(soundSetting)==='true'}catch{}
-function updateSoundButton(){
- soundToggle.textContent=soundMuted?'Sound off':'Sound on';
- soundToggle.setAttribute('aria-pressed',String(!soundMuted));
- if(masterSound&&audio)masterSound.gain.setTargetAtTime(soundMuted?0:.55,audio.currentTime,.025);
-}
-function unlockSound(){
- if(soundMuted)return;
- const Audio=window.AudioContext||window.webkitAudioContext;
- if(!Audio)return;
- try{
-  if(!audio){
-   audio=new Audio();
-   masterSound=audio.createGain();
-   masterSound.gain.value=.55;
-   if(audio.createDynamicsCompressor){
-    const limiter=audio.createDynamicsCompressor();
-    limiter.threshold.value=-8;
-    limiter.ratio.value=10;
-    limiter.attack.value=.004;
-    limiter.release.value=.14;
-    masterSound.connect(limiter);
-    limiter.connect(audio.destination);
-   }else masterSound.connect(audio.destination);
-  }
-  if(audio.state!=='running')audio.resume().catch(()=>{});
- }catch{}
-}
-function sfx(name,variation=.04){
- if(soundMuted||!masterSound||audio.state!=='running'||voicesPlaying>=16)return;
- const now=audio.currentTime,previous=lastSound.get(name)??-Infinity;
- if(now-previous<(name==='shard'?.072:.045))return;
- let buffer=soundBuffers.get(name);
- if(!buffer){
-  const samples=renderGameSound(name);
-  buffer=audio.createBuffer(1,samples.length,soundSampleRate);
-  buffer.getChannelData(0).set(samples);
-  soundBuffers.set(name,buffer);
- }
- const voice=audio.createBufferSource();
- voice.buffer=buffer;
- soundVariationSeed=(Math.imul(soundVariationSeed,1664525)+1013904223)>>>0;
- voice.playbackRate.value=1+(soundVariationSeed/4294967296-.5)*variation;
- voice.connect(masterSound);
- voice.onended=()=>{voicesPlaying--;voice.disconnect()};
- voicesPlaying++;
- voice.start();
- lastSound.set(name,now);
-}
-function setSoundMuted(muted){
- soundMuted=muted;
- try{localStorage.setItem(soundSetting,String(muted))}catch{}
- if(!muted)unlockSound();
- updateSoundButton();
-}
-soundToggle.addEventListener('click',()=>setSoundMuted(!soundMuted));
-updateSoundButton();
-
 const tutorialStart=document.querySelector('#tutorialStart'),endlessStart=document.querySelector('#endlessStart');
 const tutorialTip=document.querySelector('#tutorialTip');
 const tutorialText=document.querySelector('#tutorialText');
@@ -2085,7 +1959,7 @@ function enterBossPortal(){if(boss&&boss.worldBoss){
 function resetJourneyPrompt(){endlessRun=null;endlessRetryDevice=null;endlessStart.textContent='Endless';endlessStart.classList.remove('hidden');tutorialStart.classList.remove('hidden');storyStart.classList.remove('hidden');storyQuit.classList.add('hidden');requestedMode='campaign';gameMode='campaign';tutorial=null;storyProgress=null;storyMission=null;storyAction.classList.add('hidden');window.shardboundDeviceStarting=false;selectedDevice=null;gameEl.dataset.device='pc';gameEl.classList.remove('mobile-mode');overlay.classList.remove('ending');overlay.querySelector('.eyebrow').textContent='The elements awaken';overlay.querySelector('h1').textContent='Shardbound';startBtn.classList.remove('hidden');deviceChoice.classList.add('hidden');deviceChoice.setAttribute('aria-hidden','true');keySummary.classList.remove('hidden');introText.textContent='Oh no! The guardians took the shiny shards. Grab your weapons, bonk the bad guys, and reclaim them across 15 elemental stages!';gameNote.textContent='Find the shiny shards, beat the big bosses, and save the worlds. You can do it!';startBtn.textContent='Begin journey'}
 function showDeviceChoice(){endlessStart.classList.add('hidden');tutorialStart.classList.add('hidden');storyStart.classList.add('hidden');introText.textContent='Choose how you want to play.';keySummary.classList.add('hidden');gameNote.textContent='Choose PC / Laptop or Mobile to start your journey.';startBtn.classList.add('hidden');deviceChoice.classList.remove('hidden');deviceChoice.setAttribute('aria-hidden','false');requestAnimationFrame(()=>{const preferred=window.matchMedia('(max-width: 700px)').matches?mobileStartBtn:pcStartBtn;preferred.focus({preventScroll:true})})}
 function beginJourney(e){if(e)e.preventDefault();if(gameState==='paused'){startGame();return}if(gameState==='playing')return;if(gameState!=='title')resetJourneyPrompt();showDeviceChoice()}
-function chooseDevice(device){unlockSound();selectedDevice=device;gameEl.dataset.device=device;gameEl.classList.toggle('mobile-mode',device==='mobile');try{gameMode=requestedMode;requestedMode='campaign';reset();if(gameMode==='tutorial')startTutorial();else if(gameMode==='story')startStory();else if(gameMode==='endless')startEndlessRun();keys={};gameState='playing';overlay.classList.add('hidden');syncCursor();last=performance.now();if(!loopStarted){loopStarted=true;requestAnimationFrame(loop)}canvas.focus({preventScroll:true});gameNote.textContent=''}catch(error){window.shardboundDeviceStarting=false;console.error('Shardbound device start failed:',error);gameState='title';overlay.classList.remove('hidden');startBtn.classList.add('hidden');deviceChoice.classList.remove('hidden');deviceChoice.setAttribute('aria-hidden','false');gameNote.textContent='Could not start the game: '+(error&&error.message?error.message:'unknown startup error')}}
+function chooseDevice(device){selectedDevice=device;gameEl.dataset.device=device;gameEl.classList.toggle('mobile-mode',device==='mobile');try{gameMode=requestedMode;requestedMode='campaign';reset();if(gameMode==='tutorial')startTutorial();else if(gameMode==='story')startStory();else if(gameMode==='endless')startEndlessRun();keys={};gameState='playing';overlay.classList.add('hidden');syncCursor();last=performance.now();if(!loopStarted){loopStarted=true;requestAnimationFrame(loop)}canvas.focus({preventScroll:true});gameNote.textContent=''}catch(error){window.shardboundDeviceStarting=false;console.error('Shardbound device start failed:',error);gameState='title';overlay.classList.remove('hidden');startBtn.classList.add('hidden');deviceChoice.classList.remove('hidden');deviceChoice.setAttribute('aria-hidden','false');gameNote.textContent='Could not start the game: '+(error&&error.message?error.message:'unknown startup error')}}
 window.shardboundChooseDevice=device=>chooseDevice(device);window.shardboundResumeJourney=resumeGame;window.shardboundIsPaused=()=>gameState==='paused';
 function awardDashCounter(){
  if(stage==='tutorial'||inStoryHub()||player.creatorMode||player.dashCounterEarned)return;
@@ -2154,7 +2028,6 @@ function tryDash(){
   }
  }
  const distance=Math.abs(destination-p.x),groundRoll=p.onGround;
- sfx('dash');
  p.dashCounterEarned=false;
  p.dashDir=p.face=dir;
  p.dashTargetX=destination;
@@ -2221,7 +2094,6 @@ function useBufferedJump(p,dt){
   p.dashDodgeTimer=0;
   p.vx=(movementDirection()||p.dashDir)*groundRunSpeed*(p.speedBonus||1);
  }
- sfx('jump');
  if(!fromGround){
   p.doubleJumpTimer=.42;
   if(stage==='tutorial'&&tutorialRooms[tutorial.room].skill==='doubleJump')tutorial.skillUsed=true;
@@ -2277,10 +2149,9 @@ function lungeToMarkedEnemy(p){
 function trackMouse(e){if(e.pointerType!=='mouse'&&!(e.pointerType==='touch'&&gameEl.classList.contains('mobile-mode')&&!e.target.closest('.touch')))return;const r=canvas.getBoundingClientRect(),s=Math.min(r.width/W,r.height/H),ox=(r.width-W*s)/2,oy=(r.height-H*s)/2;mouse.x=(e.clientX-r.left-ox)/s;mouse.y=(e.clientY-r.top-oy)/s;mouse.active=mouse.x>=0&&mouse.x<=W&&mouse.y>=0&&mouse.y<=H}
 gameEl.addEventListener('pointermove',trackMouse);
 gameEl.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')mouse.active=false});
-gameEl.addEventListener('pointerdown',e=>{const attackPointer=e.pointerType==='mouse'&&e.button===0||e.pointerType==='touch'&&gameEl.classList.contains('mobile-mode');if(attackPointer&&!e.target.closest('.touch')&&!e.target.closest('.overlay,.tutorial-tip,.story-scene,.story-action,.upgrade-modal,.sound-toggle')){e.preventDefault();trackMouse(e);attack(1)}});
+gameEl.addEventListener('pointerdown',e=>{const attackPointer=e.pointerType==='mouse'&&e.button===0||e.pointerType==='touch'&&gameEl.classList.contains('mobile-mode');if(attackPointer&&!e.target.closest('.touch')&&!e.target.closest('.overlay,.tutorial-tip,.story-scene,.story-action,.upgrade-modal')){e.preventDefault();trackMouse(e);attack(1)}});
 function startSwordSwing(p){
  const heavy=p.swordComboTimer>0&&p.swordComboStep===2;
- sfx('sword');
  p.swordComboStep=heavy?0:p.swordComboTimer>0?p.swordComboStep+1:1;
  p.swordComboTimer=1.15;
  p.swingFace=movementDirection()||p.face;
@@ -2302,7 +2173,7 @@ function attack(){
   else player.swordBuffer=Math.max(.24,player.dashTimer+.12);
   return;
  }
- if(player.weapon==='chakram'){if(player.chakramCooldown<=0&&!chakramInFlight()){const originY=player.y+23;let dx=player.face,dy=0;if(mouse.active){dx=mouse.x+camera-(player.x+player.w/2);dy=mouse.y-originY;if(dx)player.face=dx<0?-1:1}const length=Math.hypot(dx,dy)||1;shots.push({x:player.x+player.w/2+player.face*10,y:originY+2,vx:dx/length*500,vy:dy/length*500,life:3,type:'chakram',damage:1.5,void:true,counterShot:true,returnAfter:.58,returning:false,face:Math.sign(dx)||player.face,returnHits:new Set()});sfx('chakram');player.attackAnim={kind:'chakram',time:.34,max:.34};player.weaponEquipTimer=0;player.chakramCooldown=.58;updateWeaponHud()}return}const staff=player.weapon==='staff',cooldown=staff?'staffCooldown':'bowCooldown';if(player[cooldown]>0)return;const originY=player.y+23;let dx=player.face,dy=0;if(mouse.active){dx=mouse.x+camera-(player.x+player.w/2);dy=mouse.y-originY;if(dx)player.face=dx<0?-1:1}const x=player.face>0?player.x+player.w:player.x,screenX=x-camera;if(screenX<0||screenX>W)return;const length=Math.hypot(dx,dy)||1,speed=staff?480:650;shots.push({x,y:originY,vx:dx/length*speed,vy:dy/length*speed,life:4,type:staff?'shard':'arrow',damage:staff?2:1,damageMultiplier:1,void:true,counterShot:true,element:staff?'magma':'ice'});sfx(staff?'staff':'bow');player.attackAnim={kind:staff?'staff':'bow',time:.26,max:.26};player.weaponEquipTimer=0;player[cooldown]=stage==='tutorial'?(staff?1.7:1.3):staff?1.9:1.35;updateWeaponHud()}
+ if(player.weapon==='chakram'){if(player.chakramCooldown<=0&&!chakramInFlight()){const originY=player.y+23;let dx=player.face,dy=0;if(mouse.active){dx=mouse.x+camera-(player.x+player.w/2);dy=mouse.y-originY;if(dx)player.face=dx<0?-1:1}const length=Math.hypot(dx,dy)||1;shots.push({x:player.x+player.w/2+player.face*10,y:originY+2,vx:dx/length*500,vy:dy/length*500,life:3,type:'chakram',damage:1.5,void:true,counterShot:true,returnAfter:.58,returning:false,face:Math.sign(dx)||player.face,returnHits:new Set()});player.attackAnim={kind:'chakram',time:.34,max:.34};player.weaponEquipTimer=0;player.chakramCooldown=.58;updateWeaponHud()}return}const staff=player.weapon==='staff',cooldown=staff?'staffCooldown':'bowCooldown';if(player[cooldown]>0)return;const originY=player.y+23;let dx=player.face,dy=0;if(mouse.active){dx=mouse.x+camera-(player.x+player.w/2);dy=mouse.y-originY;if(dx)player.face=dx<0?-1:1}const x=player.face>0?player.x+player.w:player.x,screenX=x-camera;if(screenX<0||screenX>W)return;const length=Math.hypot(dx,dy)||1,speed=staff?480:650;shots.push({x,y:originY,vx:dx/length*speed,vy:dy/length*speed,life:4,type:staff?'shard':'arrow',damage:staff?2:1,damageMultiplier:1,void:true,counterShot:true,element:staff?'magma':'ice'});player.attackAnim={kind:staff?'staff':'bow',time:.26,max:.26};player.weaponEquipTimer=0;player[cooldown]=stage==='tutorial'?(staff?1.7:1.3):staff?1.9:1.35;updateWeaponHud()}
 function steerChakram(shot,p,dt){
  shot.returnAfter-=dt;
  if(shot.returnAfter<=0||shot.x<camera||shot.x>camera+W)shot.returning=true;
@@ -2420,7 +2291,7 @@ function tryDrop(){
 window.addEventListener('keydown',e=>{if(storySaveMenuBack){
  if(e.code==='Escape'){e.preventDefault();storySaveMenuBack()}
  return;
- }if((gameState==='playing'||gameState==='paused')&&e.code==='KeyM'&&!e.repeat){setSoundMuted(!soundMuted);return}
+ }
  if(gameState==='upgrade')return;if(gameState==='story'){
  if(e.code==='Escape'){e.preventDefault();if(storyDialogue)closeStoryScene();else resumeStoryPlay()}
  return;
@@ -2998,7 +2869,7 @@ function update(dt){if(gameState!=='playing')return;dt=Math.min(dt,.033);if(vict
   if(gameState==='story'||inStoryHub())return;
  }
  const swingProgress=p.swingDuration?1-p.swing/p.swingDuration:0;if(p.weapon==='sword'&&p.onGround&&p.swing>0&&p.swingDamageMultiplier>1&&!p.bigImpactDone&&swingProgress>=.82){p.bigImpactDone=true;const impactX=p.x+p.w/2+p.swingFace*48,surface=platforms.filter(pl=>impactX>=pl.x&&impactX<=pl.x+pl.w&&pl.y>=p.y+p.h-8).sort((a,b)=>a.y-b.y)[0];if(surface)groundScars.push({x:impactX,y:surface.y,life:5,maxLife:5});for(const b of barricades){if(!b.alive||Math.abs((b.x+b.w/2)-impactX)>58)continue;b.hp--;burst(b.x+b.w/2,b.y+24,'#e6c58f',10);if(b.hp<=0){b.alive=false;burst(b.x+b.w/2,b.y+24,'#ffe1a0',18)}}}if(p.weapon==='sword'&&p.swing>0&&swingProgress>=.22&&swingProgress<=.76){enemies.forEach(e=>{if(e.hp>0&&e.type!=='target'&&!p.swingHits.has(e)&&meleeWeaponHitsRect(p,{x:e.x,y:e.y,w:32,h:42})){p.swingHits.add(e);let hitDamage=enemyHitDamage(e,(player.ultimateSword?3:1)*(p.swingDamageMultiplier||1)+essenceDamage(e),e.x+15,e.y+18,false,true,p.swingDamageMultiplier>1);if(hitDamage>0&&e.marked>0){e.marked=0;hitDamage*=3;burst(e.x+16,e.y+18,'#8bf3ff',15);for(const nearby of enemies){if(nearby===e||nearby.hp<=0||Math.hypot(nearby.x-e.x,nearby.y-e.y)>82)continue;nearby.hp=Math.max(0,nearby.hp-enemyHitDamage(nearby,Math.max(1,hitDamage*.5),nearby.x+16,nearby.y+20));burst(nearby.x+16,nearby.y+20,'#8bf3ff',5)}particles.push({x:e.x+16,y:e.y+8,vx:0,vy:-48,life:.7,max:.7,color:'#9bf7ff',size:12,text:'KINETIC DETONATION'})}e.hp=Math.max(0,e.hp-hitDamage);if(hitDamage>0&&p.swingDamageMultiplier>1){interruptEnemy(e,Math.sign(e.x-p.x)||p.swingFace);shake=Math.max(shake,3.2)}applyEssenceEffects(e,p.swingFace);if(e.cosmicBrand>0)detonateCosmicBrand(e);if(stage==='castle'&&e.hp<=0)updateCastleProgress();burst(e.x+15,e.y+18,player.ultimateSword?'#c99cff':'#ffd477',player.ultimateSword?14:7)}});if(boss&&boss.hp>0&&!p.swingHits.has(boss)&&meleeWeaponHitsRect(p,{x:boss.x,y:boss.y+12,w:boss.w,h:boss.h-20})){p.swingHits.add(boss);if(!boss.armor||player.ultimateSword){boss.hp=Math.max(0,boss.hp-bossHitDamage(boss.x+(p.swingFace>0?0:boss.w),boss.y+58,15*(p.swingDamageMultiplier||1),true));applyEssenceEffects(boss,p.swingFace);burst(boss.x+(p.swingFace>0?0:boss.w),boss.y+58,player.ultimateSword?'#c99cff':'#ffd477',player.ultimateSword?14:9);updateHud();if(boss.hp<=0)advanceBossLevel()}else burst(boss.x+boss.w/2,boss.y+58,'#aebfce',6)}}
- for(const s of shards){if(!s.got&&Math.abs((p.x+p.w/2)-s.x)<25&&Math.abs((p.y+p.h/2)-(s.y+Math.sin(performance.now()/260+s.phase)*7.5))<30){s.got=true;sfx('shard');pickupEffects.push({x:s.x,y:s.y,time:0,max:.42,color:level===2?'#a9f27f':(elementColors[currentMode().element]||'#b5fff3')});if(pickupEffects.length>12)pickupEffects.shift();score++;if(stage!=='tutorial'){totalScore++;saveProgress(true)}player.ultimateCharge=Math.min(100,(player.ultimateCharge||0)+10);if(level===2)player.hp=Math.min(player.maxHp,player.hp+1);burst(s.x,s.y,level===2?'#a9f27f':'#b5fff3',6);updateHud()}}
+ for(const s of shards){if(!s.got&&Math.abs((p.x+p.w/2)-s.x)<25&&Math.abs((p.y+p.h/2)-(s.y+Math.sin(performance.now()/260+s.phase)*7.5))<30){s.got=true;pickupEffects.push({x:s.x,y:s.y,time:0,max:.42,color:level===2?'#a9f27f':(elementColors[currentMode().element]||'#b5fff3')});if(pickupEffects.length>12)pickupEffects.shift();score++;if(stage!=='tutorial'){totalScore++;saveProgress(true)}player.ultimateCharge=Math.min(100,(player.ultimateCharge||0)+10);if(level===2)player.hp=Math.min(player.maxHp,player.hp+1);burst(s.x,s.y,level===2?'#a9f27f':'#b5fff3',6);updateHud()}}
  enemies.forEach(e=>{
    if(e.hp<=0||e.type==='target')return;if(e.elite&&e.type!=='staff'){const floor=platforms.filter(pl=>!pl.falling&&e.x+16>pl.x&&e.x+16<pl.x+pl.w&&pl.y>=e.y+42).reduce((best,pl)=>Math.min(best,pl.y),groundY);e.y=floor-42}e.marked=Math.max(0,(e.marked||0)-dt);e.cosmicBrand=Math.max(0,(e.cosmicBrand||0)-dt);e.rooted=Math.max(0,(e.rooted||0)-dt);
    e.impactFlash=Math.max(0,(e.impactFlash||0)-dt);
